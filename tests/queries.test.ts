@@ -27,12 +27,12 @@ const hoverAt = (line: number, name: string): string | undefined =>
 describe("hovers", () => {
   test("values get the solver's types", () => {
     expect(hoverAt(4, "button")).toBe("Button");
-    expect(hoverAt(6, "GetWidth")).toBe("(Region) -> number");
+    expect(hoverAt(6, "GetWidth")).toBe("(self: Region) -> number");
     expect(hoverAt(8, "self")).toBe("Frame");
   });
 
   test("a type function in an annotation shows what it resolves to", () => {
-    expect(hoverAt(14, "EventHandler")).toBe("(number, number) -> ()");
+    expect(hoverAt(14, "EventHandler")).toBe("(level: number, healthDelta: number) -> ()");
   });
 
   test("a declaration shows its initializer's type, refined uses show the refinement", () => {
