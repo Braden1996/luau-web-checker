@@ -1,6 +1,6 @@
 {
   "name": "luau-web-checker",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, plus build-time checked, hoverable code blocks for Expressive Code (Twoslash for Luau).",
   "repository": {
     "type": "git",
@@ -18,6 +18,10 @@
     "./expressive-code": {
       "types": "./dist/expressive-code.d.ts",
       "default": "./dist/expressive-code.js"
+    },
+    "./pretty": {
+      "types": "./dist/pretty.d.ts",
+      "default": "./dist/pretty.js"
     },
     "./luau-checker.wasm": "./dist/luau-checker.wasm",
     "./package.json": "./package.json"

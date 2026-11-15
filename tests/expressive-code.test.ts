@@ -71,7 +71,7 @@ describe("checkSnippet", () => {
   });
 
   test("labels and trivial hovers", () => {
-    const base = { line: 1, column: 1, endLine: 1, endColumn: 2 };
+    const base = { line: 1, column: 1, endLine: 1, endColumn: 2, expanded: "" };
     expect(hoverLabel({ ...base, kind: "local", name: "x", type: "number" })).toBe("local x: number");
     expect(hoverLabel({ ...base, kind: "property", name: "open", type: "(id: number) -> boolean" })).toBe(
       ".open: (id: number) -> boolean",
@@ -104,7 +104,8 @@ describe("pluginLuauTypes", () => {
   test("the prelude is not rendered", async () => {
     const { html } = await render("local secretName = 'x'\n-- ---cut---\nsetName(secretName)");
     expect(html).not.toContain("---cut---");
-    expect(html.match(/secretName/gu)).toHaveLength(2); // the shown use and its data-luau-type label
+    expect(html).not.toContain("secretName = ");
+    expect(html).toContain('data-luau-type="local secretName: string"');
   });
 
   test("a marked error is underlined up to its comment", async () => {
@@ -143,8 +144,8 @@ describe("pluginLuauTypes", () => {
   });
 
   test("a shared prelude is checked first and never shown", async () => {
-    const { html } = await render("setName(greeting)", { prelude: 'local greeting = "hi"' });
-    expect(html).not.toContain("hi");
+    const { html } = await render("setName(greeting)", { prelude: 'local greeting = "zebra"' });
+    expect(html).not.toContain("zebra");
     expect(html).toContain('data-luau-type="local greeting: string"');
     expect(render("local x = 1", { prelude: "setName(1)" })).rejects.toThrow("shared prelude");
   });

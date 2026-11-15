@@ -8,6 +8,8 @@
 #include "Luau/ExperimentalFlags.h"
 #include "Luau/Frontend.h"
 #include "Luau/Linter.h"
+#include "Luau/Normalize.h"
+#include "Luau/UnifierSharedState.h"
 #include "Luau/ToString.h"
 #include "Luau/TypeInfer.h"
 
@@ -183,14 +185,48 @@ struct HoverCollector : Luau::AstVisitor
 {
     const Luau::Module& module;
     Luau::ToStringOptions options;
+    Luau::ToStringOptions expandedOptions;
+    // For `expanded`: the normaliser merges an intersection of tables (`A & { b: B }`) into one table.
+    Luau::TypeArena arena;
+    Luau::InternalErrorReporter ice;
+    Luau::UnifierSharedState sharedState{&ice};
+    Luau::Normalizer normalizer;
     std::string out = "[";
 
-    explicit HoverCollector(const Luau::Module& module)
+    HoverCollector(const Luau::Module& module, Luau::NotNull<Luau::BuiltinTypes> builtinTypes)
         : module(module)
+        , normalizer(&arena, builtinTypes, Luau::NotNull{&sharedState}, Luau::SolverMode::New)
     {
         options.maxTableLength = 30;
         options.maxTypeLength = 300;
         options.functionTypeArguments = true; // `(level: number) -> ()`, as editors show it
+        expandedOptions = options;
+        expandedOptions.exhaustive = true;
+        expandedOptions.maxTableLength = 60;
+        expandedOptions.maxTypeLength = 2000;
+    }
+
+    // The type with aliases unfolded and table intersections merged, for a hover that explains what a type is.
+    std::string expand(Luau::TypeId ty)
+    {
+        Luau::TypeId shown = Luau::follow(ty);
+        bool hasIntersection = Luau::get<Luau::IntersectionType>(shown) != nullptr;
+        if (const auto* u = Luau::get<Luau::UnionType>(shown))
+            for (Luau::TypeId option : u->options)
+                hasIntersection = hasIntersection || Luau::get<Luau::IntersectionType>(Luau::follow(option)) != nullptr;
+        if (hasIntersection)
+        {
+            try
+            {
+                if (std::shared_ptr<const Luau::NormalizedType> normal = normalizer.normalize(shown))
+                    shown = normalizer.typeFromNormal(*normal);
+            }
+            catch (const Luau::InternalCompilerError&)
+            {
+                // Leave it as the solver has it.
+            }
+        }
+        return Luau::toString(shown, expandedOptions);
     }
 
     void emit(const Luau::Location& loc, const char* kind, const char* name, std::optional<Luau::TypeId> ty)
@@ -207,6 +243,8 @@ struct HoverCollector : Luau::AstVisitor
         appendJsonString(out, name);
         out += ",\"type\":";
         appendJsonString(out, Luau::toString(*ty, options));
+        out += ",\"expanded\":";
+        appendJsonString(out, expand(*ty));
         out += '}';
     }
 
@@ -472,7 +510,7 @@ public:
         const Luau::SourceModule* source = frontend->getSourceModule(name);
         if (!module || !source || !source->root)
             return "[]";
-        HoverCollector collector(*module);
+        HoverCollector collector(*module, frontend->builtinTypes);
         source->root->visit(&collector);
         return collector.out + "]";
     }

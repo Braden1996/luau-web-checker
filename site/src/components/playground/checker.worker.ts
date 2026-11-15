@@ -1,7 +1,7 @@
 // The playground's checker, off the main thread: luau-web-checker with the example API (or none), answering one
 // request at a time. The module and the .wasm load on the first request; Vite bundles both with the site.
 
-import type { Diagnostic } from "luau-web-checker";
+import type { Diagnostic, Hover } from "luau-web-checker";
 import { Checker } from "luau-web-checker";
 
 import exampleApi from "../../lib/example-api.d.luau?raw";
@@ -21,6 +21,24 @@ function checkerFor(definitions: Definitions): Promise<Checker> {
     checkers.set(definitions, checker);
   }
   return checker;
+}
+
+// The identifier under a position (module lines, 1-based), moved to the editor's lines.
+function hoverAt(
+  checker: Checker,
+  position: { readonly line: number; readonly column: number },
+): Hover | undefined {
+  const hover = checker
+    .hovers(MODULE)
+    .find(
+      (entry) =>
+        entry.line === position.line &&
+        entry.column <= position.column &&
+        position.column < entry.endColumn,
+    );
+  return hover === undefined
+    ? undefined
+    : { ...hover, line: hover.line - 1, endLine: hover.endLine - 1 };
 }
 
 async function answer(request: Request): Promise<Response> {
@@ -47,8 +65,8 @@ async function answer(request: Request): Promise<Response> {
     return { id: request.id, kind: "check", diagnostics };
   }
   const position = { line: request.line + 1, column: request.column };
-  return request.kind === "typeAt"
-    ? { id: request.id, kind: "typeAt", type: checker.typeAt(MODULE, position) }
+  return request.kind === "hover"
+    ? { id: request.id, kind: "hover", hover: hoverAt(checker, position) }
     : { id: request.id, kind: "complete", completions: checker.complete(MODULE, position) };
 }
 

@@ -7,7 +7,7 @@ Each release is attached to [GitHub releases](https://github.com/Braden1996/luau
 tarball. Install it by URL. Your lockfile records the tarball's integrity hash, so the install is pinned:
 
 ```sh
-bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.2.0/luau-web-checker-0.2.0.tgz
+bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.4.0/luau-web-checker-0.4.0.tgz
 ```
 
 npm, pnpm and Yarn accept the same URL.

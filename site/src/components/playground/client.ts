@@ -1,6 +1,6 @@
 // The page's side of the checker worker: one request at a time, newest wins, each answered by its own promise.
 
-import type { Completion, Diagnostic } from "luau-web-checker";
+import type { Completion, Diagnostic, Hover } from "luau-web-checker";
 
 import type { Definitions, Request, Response } from "./protocol.ts";
 
@@ -11,12 +11,12 @@ export interface Settings {
 
 export interface CheckerClient {
   check(source: string, settings: Settings): Promise<readonly Diagnostic[]>;
-  typeAt(
+  hover(
     source: string,
     settings: Settings,
     line: number,
     column: number,
-  ): Promise<string | undefined>;
+  ): Promise<Hover | undefined>;
   complete(
     source: string,
     settings: Settings,
@@ -56,9 +56,9 @@ export function createClient(): CheckerClient {
       const response = await send({ kind: "check", source, ...settings });
       return response.kind === "check" ? response.diagnostics : fail(response);
     },
-    async typeAt(source, settings, line, column) {
-      const response = await send({ kind: "typeAt", source, ...settings, line, column });
-      return response.kind === "typeAt" ? response.type : fail(response);
+    async hover(source, settings, line, column) {
+      const response = await send({ kind: "hover", source, ...settings, line, column });
+      return response.kind === "hover" ? response.hover : fail(response);
     },
     async complete(source, settings, line, column) {
       const response = await send({ kind: "complete", source, ...settings, line, column });

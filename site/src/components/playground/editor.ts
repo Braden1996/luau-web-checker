@@ -25,6 +25,8 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
+import type { HoverView, TokenLines } from "luau-web-checker/pretty";
+import { hoverView } from "luau-web-checker/pretty";
 
 import type { CheckerClient, Settings } from "./client.ts";
 
@@ -86,6 +88,38 @@ function lintSource(hooks: EditorHooks): Extension {
   );
 }
 
+function renderLines(className: string, lines: TokenLines): HTMLElement {
+  const block = document.createElement("div");
+  block.className = className;
+  lines.forEach((line, index) => {
+    for (const token of line) {
+      if (token.kind === "text") {
+        block.append(token.text);
+      } else {
+        const span = document.createElement("span");
+        span.className = `luau-t-${token.kind}`;
+        span.textContent = token.text;
+        block.append(span);
+      }
+    }
+    if (index < lines.length - 1) {
+      block.append("\n");
+    }
+  });
+  return block;
+}
+
+// The same layout as the site's code-block tooltips: the expanded type, then the declared form underneath.
+function renderHover(view: HoverView): HTMLElement {
+  const dom = document.createElement("div");
+  dom.className = "pg-hover";
+  dom.append(renderLines("pg-hover-main", view.main));
+  if (view.declared !== undefined) {
+    dom.append(renderLines("pg-hover-declared", view.declared));
+  }
+  return dom;
+}
+
 function hoverTypes(hooks: EditorHooks): Extension {
   return hoverTooltip(async (view, offset) => {
     const word = view.state.wordAt(offset);
@@ -93,25 +127,20 @@ function hoverTypes(hooks: EditorHooks): Extension {
       return null;
     }
     const position = toPosition(view.state.doc, offset);
-    const type = await hooks.client.typeAt(
+    const hover = await hooks.client.hover(
       view.state.doc.toString(),
       hooks.settings(),
       position.line,
       position.column,
     );
-    if (type === undefined) {
+    if (hover === undefined) {
       return null;
     }
     return {
       pos: word.from,
       end: word.to,
       above: true,
-      create: () => {
-        const dom = document.createElement("div");
-        dom.className = "pg-hover";
-        dom.textContent = `${view.state.sliceDoc(word.from, word.to)}: ${type}`;
-        return { dom };
-      },
+      create: () => ({ dom: renderHover(hoverView(hover)) }),
     };
   });
 }

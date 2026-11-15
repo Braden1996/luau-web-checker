@@ -17,6 +17,18 @@ local home = byName.home
 local distance = math.sqrt(last.x ^ 2 + last.y ^ 2)
 ```
 
+## Intersections
+
+Hover `AB` or `value`. The tooltip shows the type expanded, as one merged table, and the declared form underneath:
+
+```luau
+type A = { a: string }
+type B = { b: A }
+type AB = A & B
+
+local value: AB = { a = "x", b = { a = "y" } }
+```
+
 ## Generic functions
 
 A generic function's type parameters are filled in at each call:

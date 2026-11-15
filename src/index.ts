@@ -41,7 +41,10 @@ export type HoverKind = "local" | "global" | "property" | "type";
 export interface Hover extends Range {
   readonly kind: HoverKind;
   readonly name: string;
+  /** The type as the solver names it (`A & B`, `Point`). */
   readonly type: string;
+  /** The same type with aliases unfolded and intersections of tables merged (`{ a: string, b: { a: string } }`). */
+  readonly expanded: string;
 }
 
 export type CompletionKind = "property" | "binding" | "keyword" | "string" | "type" | "other";
@@ -84,6 +87,9 @@ export class DefinitionsError extends Error {
     this.diagnostics = diagnostics;
   }
 }
+
+export { formatType, highlightLine, hoverView, linesToText } from "./pretty.ts";
+export type { FormatOptions, HoverView, Token, TokenKind, TokenLines } from "./pretty.ts";
 
 let defaultModule: Promise<LuauCheckerModule> | undefined;
 
@@ -129,7 +135,8 @@ const isHover: Guard<Hover> = (value): value is Hover =>
   isRange(value) &&
   HOVER_KINDS.has(value["kind"]) &&
   typeof value["name"] === "string" &&
-  typeof value["type"] === "string";
+  typeof value["type"] === "string" &&
+  typeof value["expanded"] === "string";
 
 const COMPLETION_KINDS: ReadonlySet<unknown> = new Set<CompletionKind>([
   "property",
