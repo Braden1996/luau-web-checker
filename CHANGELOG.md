@@ -12,6 +12,8 @@ All notable changes to this project are documented here. The format follows
 - `require`: modules added with `setSource` are named by their paths, and `require` resolves them by Luau's
   require-by-string rules (`./`, `../`, and `@alias/` with the new `aliases` option). A module added later is found
   by modules that required it earlier. The agreement tests compare a multi-module fixture with luau-lsp.
+- `pluginLuauTypes` options `check: "marked"` (check only blocks marked `check`, to adopt page by page) and
+  `prelude` (hidden code checked before every block); `checkSnippet` takes the prelude too.
 
 ### Changed
 

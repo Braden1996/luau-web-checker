@@ -106,6 +106,9 @@ Hovering an identifier shows its type, and a type function shows what it resolve
 links, such as to an API reference, and `tooltips: false` to render the cards yourself from the `data-luau-type` and
 `data-luau-error` attributes.
 
+To adopt it gradually, pass `check: "marked"`, and only blocks marked ` ```luau check ` are checked, as Twoslash is
+opted into. Pass `prelude` for hidden setup that every block needs, such as `local Result = require("./Result")`.
+
 ## API
 
 | Member                                           | What it does                                                                                                                                                                                         |

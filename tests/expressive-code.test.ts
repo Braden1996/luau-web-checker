@@ -136,6 +136,19 @@ describe("pluginLuauTypes", () => {
     expect((await render("declare Thing: number")).html).not.toContain("data-luau");
   });
 
+  test("check: marked checks only blocks marked check", async () => {
+    expect((await render("setName(42)", { check: "marked" })).html).not.toContain("data-luau");
+    expect(render("setName(42)", { check: "marked" }, "check")).rejects.toThrow("does not type-check");
+    expect((await render("local x = getMoney()", { check: "marked" }, "check")).html).toContain("data-luau-type");
+  });
+
+  test("a shared prelude is checked first and never shown", async () => {
+    const { html } = await render("setName(greeting)", { prelude: 'local greeting = "hi"' });
+    expect(html).not.toContain("hi");
+    expect(html).toContain('data-luau-type="local greeting: string"');
+    expect(render("local x = 1", { prelude: "setName(1)" })).rejects.toThrow("shared prelude");
+  });
+
   test("the tooltip script and styles ship unless turned off", async () => {
     const withTips = await render("local x = 1");
     const scripts = await withTips.engine.getJsModules();
