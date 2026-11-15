@@ -37,6 +37,13 @@ export interface LuauTypesOptions {
   readonly link?: (hover: Hover, previous: Hover | undefined) => HoverLink | undefined;
   /** Show the built-in tooltips (default `true`). Turn them off to render cards from the data attributes yourself. */
   readonly tooltips?: boolean;
+  /**
+   * Which blocks to check: every block of the languages (`"all"`, the default), or only blocks whose meta has `check`
+   * (`"marked"`, opted into as Twoslash is), for a site that turns checking on page by page.
+   */
+  readonly check?: "all" | "marked";
+  /** Hidden code checked before every block, such as the `require` lines the examples assume. */
+  readonly prelude?: string;
 }
 
 type Rendered = ReturnType<ExpressiveCodeAnnotation["render"]>;
@@ -101,13 +108,14 @@ export function pluginLuauTypes(options: LuauTypesOptions): ExpressiveCodePlugin
         if (
           !languages.has(codeBlock.language) ||
           codeBlock.metaOptions.getBoolean("nocheck") === true ||
+          (options.check === "marked" && codeBlock.metaOptions.getBoolean("check") !== true) ||
           isDefinitionsFile(codeBlock.code)
         ) {
           return;
         }
         blocks += 1;
         const checker = await options.checker();
-        const checked = checkSnippet(checker, `block${String(blocks)}.luau`, codeBlock.code);
+        const checked = checkSnippet(checker, `block${String(blocks)}.luau`, codeBlock.code, options.prelude);
 
         if (checked.hidden > 0) {
           codeBlock.deleteLines(Array.from({ length: checked.hidden }, (_, index) => index));

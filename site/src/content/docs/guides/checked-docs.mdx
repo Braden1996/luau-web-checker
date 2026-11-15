@@ -78,6 +78,8 @@ pluginLuauTypes({
   languages: ["luau"], // the block languages to check
   link: (hover, previous) => undefined, // a link for an identifier, e.g. to an API reference page
   tooltips: true, // false to render your own cards from the data attributes
+  check: "all", // "marked": only blocks marked ```luau check (adopt page by page)
+  prelude: "", // hidden code checked before every block, e.g. the require lines examples assume
 });
 ```
 

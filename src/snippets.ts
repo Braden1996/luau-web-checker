@@ -81,26 +81,35 @@ function shift<T extends Diagnostic | Hover>(entry: T, hidden: number): T {
 
 /**
  * Checks one code block. `checker` must already have its definitions. The block is added as module `name` and
- * removed again afterwards.
+ * removed again afterwards. `prelude` is hidden code checked before every block, such as the `require` lines its
+ * examples assume.
  *
  * @throws SnippetError when an unmarked line has an error or a marked line has none.
  */
-export function checkSnippet(checker: Checker, name: string, code: string): CheckedSnippet {
+export function checkSnippet(checker: Checker, name: string, code: string, prelude = ""): CheckedSnippet {
   const lines = code.split("\n");
   const cutIndex = lines.findIndex((line) => line.trim() === CUT);
   const hidden = cutIndex === -1 ? 0 : cutIndex + 1;
   // The cut line becomes a blank line, so positions in the checked source equal positions in the block.
-  const source = cutIndex === -1 ? code : lines.map((line, index) => (index === cutIndex ? "" : line)).join("\n");
+  const block = cutIndex === -1 ? code : lines.map((line, index) => (index === cutIndex ? "" : line)).join("\n");
+  const preludeLines = prelude === "" ? 0 : prelude.replace(/\n$/u, "").split("\n").length;
+  const source = preludeLines === 0 ? block : `${prelude.replace(/\n$/u, "")}\n${block}`;
 
   checker.setSource(name, source);
   try {
-    const errors = checker.check(name).filter((diagnostic) => ERROR_KINDS.has(diagnostic.kind));
-    const hovers = checker.hovers(name);
+    // From here on, line 1 is the block's first line; the shared prelude is at line 0 and before.
+    const errors = checker
+      .check(name)
+      .filter((diagnostic) => ERROR_KINDS.has(diagnostic.kind))
+      .map((error) => shift(error, preludeLines));
+    const hovers = checker.hovers(name).map((hover) => shift(hover, preludeLines));
 
     const marked = new Set(lines.flatMap((line, index) => (ERROR_MARK.test(line) ? [index + 1] : [])));
     const problems: string[] = [];
     for (const error of errors) {
-      if (error.line <= hidden) {
+      if (error.line < 1) {
+        problems.push(`shared prelude, line ${String(error.line + preludeLines)}: ${error.kind}: ${error.message}`);
+      } else if (error.line <= hidden) {
         problems.push(`hidden prelude, line ${String(error.line)}: ${error.kind}: ${error.message}`);
       } else if (!marked.has(error.line)) {
         problems.push(`line ${String(error.line - hidden)}: ${error.kind}: ${error.message}`);

@@ -8,6 +8,7 @@ export interface NativeChecker {
   setStrict(strict: boolean): void;
   setSource(name: string, source: string): void;
   removeSource(name: string): void;
+  setAlias(name: string, directory: string): void;
   check(name: string): string;
   hovers(name: string): string;
   typeAt(name: string, line: number, column: number): string;
