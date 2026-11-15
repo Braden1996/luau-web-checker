@@ -5,6 +5,13 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-11-15
+
+### Changed
+
+- Hover, `typeAt` and completion types name their function parameters, as editors show them:
+  `(level: number, healthDelta: number) -> ()` instead of `(number, number) -> ()`. Diagnostics are unchanged.
+
 ## [0.1.0] - 2026-11-15
 
 ### Added
@@ -16,5 +23,6 @@ All notable changes to this project are documented here. The format follows
 - Definitions files, `disabledGlobals` (luau-lsp's `types.disabledGlobals`) and a `strict` default mode.
 - Agreement tests: every fixture's diagnostics must equal `luau-lsp analyze`'s.
 
-[Unreleased]: https://github.com/Braden1996/luau-web-checker/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/Braden1996/luau-web-checker/compare/v0.1.1...HEAD
+[0.1.1]: https://github.com/Braden1996/luau-web-checker/compare/v0.1.0...v0.1.1
 [0.1.0]: https://github.com/Braden1996/luau-web-checker/releases/tag/v0.1.0

@@ -120,6 +120,7 @@ struct HoverCollector : Luau::AstVisitor
     {
         options.maxTableLength = 30;
         options.maxTypeLength = 300;
+        options.functionTypeArguments = true; // `(level: number) -> ()`, as editors show it
     }
 
     void emit(const Luau::Location& loc, const char* kind, const char* name, std::optional<Luau::TypeId> ty)
@@ -371,6 +372,7 @@ public:
         Luau::ToStringOptions options;
         options.maxTableLength = 30;
         options.maxTypeLength = 300;
+        options.functionTypeArguments = true;
         return Luau::toString(*ty, options);
     }
 
@@ -406,6 +408,7 @@ public:
             Luau::ToStringOptions options;
             options.maxTableLength = 10;
             options.maxTypeLength = 120;
+            options.functionTypeArguments = true;
             for (const auto& [label, entry] : result.entryMap)
             {
                 if (out.size() > 1)

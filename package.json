@@ -1,6 +1,6 @@
 {
   "name": "luau-web-checker",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, with your definitions files.",
   "repository": {
     "type": "git",

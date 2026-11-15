@@ -20,7 +20,7 @@ luau-lsp's answers.
 
 | Build   | Luau                                                          | Reference       | Emscripten |
 | ------- | ------------------------------------------------------------- | --------------- | ---------- |
-| `0.1.0` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
+| `0.1.x` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
 
 ## Install
 
@@ -28,7 +28,7 @@ Releases are attached to [GitHub releases](https://github.com/Braden1996/luau-we
 tarball. Install it by URL; your lockfile records its integrity hash:
 
 ```sh
-bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.1.0/luau-web-checker-0.1.0.tgz
+bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.1.1/luau-web-checker-0.1.1.tgz
 ```
 
 The package is about 3.3 MB, almost all of it the `.wasm` file (about 1 MB compressed).
