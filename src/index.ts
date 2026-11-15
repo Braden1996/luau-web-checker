@@ -57,7 +57,7 @@ export interface Completion {
 export type WasmSource = string | URL | ArrayBuffer | Uint8Array;
 
 export interface CheckerOptions {
-  /** Definitions files by package name (`@wow`), loaded in this order. */
+  /** Definitions files by package name (`@api`), loaded in this order. */
   readonly definitions?: Readonly<Record<string, string>>;
   /** luau-lsp's `types.disabledGlobals`: globals (`os`) or library members (`table.clone`) to remove. */
   readonly disabledGlobals?: readonly string[];

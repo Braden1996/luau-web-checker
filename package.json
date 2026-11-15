@@ -1,7 +1,7 @@
 {
   "name": "luau-web-checker",
-  "version": "0.1.1",
-  "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, with your definitions files.",
+  "version": "0.2.0",
+  "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, plus build-time checked, hoverable code blocks for Expressive Code (Twoslash for Luau).",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Braden1996/luau-web-checker.git"
@@ -15,12 +15,16 @@
       "types": "./dist/index.d.ts",
       "default": "./dist/index.js"
     },
+    "./expressive-code": {
+      "types": "./dist/expressive-code.d.ts",
+      "default": "./dist/expressive-code.js"
+    },
     "./luau-checker.wasm": "./dist/luau-checker.wasm",
     "./package.json": "./package.json"
   },
   "files": [
-    "dist/index.js",
-    "dist/index.d.ts",
+    "dist/*.js",
+    "dist/*.d.ts",
     "dist/luau-checker.mjs",
     "dist/luau-checker.d.mts",
     "dist/luau-checker.wasm",
@@ -37,11 +41,21 @@
     "test": "bun test"
   },
   "devDependencies": {
+    "@expressive-code/core": "0.44.3",
     "@types/bun": "1.4.4",
     "oxfmt": "0.78.0",
     "oxlint": "1.93.0",
     "oxlint-tsgolint": "7.0.2007",
+    "shiki": "4.6.0",
     "typescript": "7.0.2"
+  },
+  "peerDependencies": {
+    "@expressive-code/core": ">=0.40.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@expressive-code/core": {
+      "optional": true
+    }
   },
   "packageManager": "bun@1.4.4",
   "engines": {

@@ -1,7 +1,7 @@
 $schema: "./cache/schemas/workspace.json"
 
 # moon workspace. `moon run :check` is THE gate: CI runs it cold (MOON_CACHE=write), and so does the pre-push hook.
-# Conventions, as in the sibling repositories (wow-forever-luau-types, luau-true-myth):
+# Conventions:
 # - no moon toolchain plugins: every task runs on the `system` toolchain and mise puts the pinned binaries on PATH;
 # - every task is `shell: false` and runs from the workspace root;
 # - the `check` task is an aggregator that only lists deps.

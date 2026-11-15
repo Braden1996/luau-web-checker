@@ -1,5 +1,5 @@
-// oxlint: the rule set of the wow-forever-luau-types docs site (from the Higher monorepo), without its React and JSX
-// plugins. Type-aware rules run through oxlint-tsgolint, and `typeCheck` reports TypeScript errors in the same pass.
+// oxlint: a strict rule set (from the Higher monorepo). Type-aware rules run through oxlint-tsgolint, and `typeCheck`
+// reports TypeScript errors in the same pass.
 
 import { defineConfig } from "oxlint";
 
