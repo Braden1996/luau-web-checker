@@ -1,0 +1,92 @@
+---
+title: Classes and metatables
+description: The usual metatable class pattern, with the instance type derived by the solver.
+---
+
+Luau has no `class` keyword. A class is a table of methods, with a metatable that makes instances find them. The
+solver follows `setmetatable`, so `typeof` gives you the instance type without writing it twice.
+
+```luau
+local Counter = {}
+Counter.__index = Counter
+
+function Counter.new(start: number)
+	local self = setmetatable({ count = start, history = {} :: { number } }, Counter)
+	return self
+end
+
+export type Counter = typeof(Counter.new(0))
+
+function Counter.increment(self: Counter, by: number?)
+	table.insert(self.history, self.count)
+	self.count += by or 1
+end
+
+function Counter.undo(self: Counter)
+	local previous = table.remove(self.history)
+	if previous then
+		self.count = previous
+	end
+end
+
+local clicks = Counter.new(10)
+clicks:increment()
+clicks:increment(5)
+clicks:undo()
+local now = clicks.count
+```
+
+## Inheritance
+
+A subclass's metatable falls back to the parent class:
+
+```luau
+local Animal = {}
+Animal.__index = Animal
+
+function Animal.new(name: string)
+	return setmetatable({ name = name }, Animal)
+end
+
+function Animal.speak(self: { name: string }): string
+	return `{self.name} makes a sound`
+end
+
+local Dog = setmetatable({}, { __index = Animal })
+Dog.__index = Dog
+
+function Dog.new(name: string)
+	return setmetatable({ name = name, tricks = 0 }, Dog)
+end
+
+function Dog.fetch(self: { name: string, tricks: number }): string
+	self.tricks += 1
+	return `{self.name} fetched ({self.tricks})`
+end
+
+local rex = Dog.new("Rex")
+local line = rex:fetch()
+```
+
+## Metamethods
+
+```luau
+type Vector = { x: number, y: number }
+
+local VectorMeta = {}
+
+local function vector(x: number, y: number): Vector
+	return setmetatable({ x = x, y = y }, VectorMeta) :: any
+end
+
+function VectorMeta.__add(a: Vector, b: Vector): Vector
+	return vector(a.x + b.x, a.y + b.y)
+end
+
+function VectorMeta.__tostring(v: Vector): string
+	return `({v.x}, {v.y})`
+end
+
+local moved = vector(1, 2)
+local length = math.sqrt(moved.x ^ 2 + moved.y ^ 2)
+```

@@ -1,0 +1,50 @@
+{
+  "name": "luau-web-checker-site",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The documentation site for luau-web-checker (Astro + Starlight, static for GitHub Pages).",
+  "type": "module",
+  "scripts": {
+    "sync": "bun scripts/sync-docs.ts",
+    "dev": "bun run sync && astro dev",
+    "build": "bun run sync && astro build",
+    "preview": "astro preview",
+    "typecheck": "bun run sync && bun run typecheck:ts && bun run typecheck:astro",
+    "typecheck:ts": "bun run tsgo -p tsconfig.src.json && bun run tsgo -p tsconfig.worker.json && bun run tsgo -p tsconfig.test.json && bun run tsgo -p tsconfig.aux.json",
+    "tsgo": "node node_modules/@typescript/native/bin/tsc",
+    "typecheck:astro": "astro sync && astro check --tsconfig tsconfig.src.json",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "fmt": "oxfmt --write",
+    "fmt:check": "oxfmt --check",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "@astrojs/starlight": "0.43.1",
+    "@codemirror/autocomplete": "6.20.4",
+    "@codemirror/commands": "6.11.1",
+    "@codemirror/language": "6.13.1",
+    "@codemirror/legacy-modes": "6.5.5",
+    "@codemirror/lint": "6.9.8",
+    "@codemirror/state": "6.7.6",
+    "@codemirror/view": "6.43.15",
+    "@lezer/highlight": "1.2.5",
+    "astro": "7.4.12",
+    "luau-web-checker": "workspace:*",
+    "sharp": "0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.12",
+    "@types/bun": "1.4.4",
+    "@types/node": "26.6.6",
+    "@typescript/native": "npm:typescript@7.0.2",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2007",
+    "typescript": "6.0.3"
+  },
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=26.13.1"
+  }
+}

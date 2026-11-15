@@ -1,0 +1,73 @@
+---
+title: Tables and generics
+description: Arrays, maps, records and generic functions, and what the solver infers for each.
+---
+
+## Records, arrays and maps
+
+```luau
+type Point = { x: number, y: number }
+
+local origin: Point = { x = 0, y = 0 }
+local path: { Point } = { origin, { x = 3, y = 4 } }
+local byName: { [string]: Point } = { home = origin }
+
+local last = path[#path]
+local home = byName.home
+local distance = math.sqrt(last.x ^ 2 + last.y ^ 2)
+```
+
+## Generic functions
+
+A generic function's type parameters are filled in at each call:
+
+```luau
+local function map<T, U>(items: { T }, transform: (T) -> U): { U }
+	local result = {}
+	for index, item in items do
+		result[index] = transform(item)
+	end
+	return result
+end
+
+local function first<T>(items: { T }): T?
+	return items[1]
+end
+
+local lengths = map({ "a", "bb", "ccc" }, function(word: string): number
+	return #word
+end)
+local firstLength = first(lengths)
+local labels = map(lengths, tostring)
+```
+
+## Generic types
+
+```luau
+type Pair<A, B> = { first: A, second: B }
+type Stack<T> = { items: { T }, size: number }
+
+local function push<T>(stack: Stack<T>, item: T)
+	stack.size += 1
+	stack.items[stack.size] = item
+end
+
+local entry: Pair<string, number> = { first = "answer", second = 42 }
+local stack: Stack<Pair<string, number>> = { items = {}, size = 0 }
+push(stack, entry)
+local top = stack.items[stack.size]
+```
+
+## Library functions
+
+The standard library is typed too:
+
+```luau
+local scores = { 70, 95, 82 }
+table.sort(scores)
+table.insert(scores, 1, 100)
+local best = table.remove(scores, 1)
+local limits = table.freeze({ maxScore = 100 })
+local isFrozen = table.isfrozen(limits)
+local cap = limits.maxScore
+```

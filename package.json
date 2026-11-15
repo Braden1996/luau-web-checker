@@ -30,14 +30,17 @@
     "dist/luau-checker.wasm",
     "dist/LICENSE-luau.txt"
   ],
+  "workspaces": [
+    "site"
+  ],
   "scripts": {
     "build:wasm": "bun scripts/build-wasm.ts",
     "build:ts": "tsc -p tsconfig.build.json && bun scripts/copy-types.ts",
     "build": "bun run build:wasm && bun run build:ts",
     "typecheck": "tsc -p tsconfig.json",
-    "lint": "oxlint --type-aware --deny-warnings",
-    "fmt": "oxfmt --write",
-    "fmt:check": "oxfmt --check",
+    "lint": "oxlint --type-aware --deny-warnings src tests scripts oxlint.config.ts oxfmt.config.ts",
+    "fmt": "oxfmt --write src tests scripts oxlint.config.ts oxfmt.config.ts",
+    "fmt:check": "oxfmt --check src tests scripts oxlint.config.ts oxfmt.config.ts",
     "test": "bun test"
   },
   "devDependencies": {

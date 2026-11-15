@@ -9,6 +9,7 @@ versionConstraint: "=2.6.5"
 
 projects:
   repo: "."
+  site: "site"
 
 vcs:
   client: "git"
