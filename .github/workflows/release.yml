@@ -1,0 +1,62 @@
+# Publishes a release when a `v*.*.*` tag is pushed. The tagged commit is re-verified with the full `moon run :check`
+# from a cold start (no tool or moon cache, so nothing a pull request wrote can reach a release; the WebAssembly is
+# built from source here), the tag must match package.json's `version`, then the npm tarball, the WebAssembly and its
+# glue are attached with checksums. Consumers install the tarball by URL (bun.lock records its integrity).
+name: release
+
+on:
+  push:
+    tags: ["v*.*.*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    permissions:
+      contents: write # create the release
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          cache: false
+      - name: gate
+        env:
+          MOON_CACHE: write
+        run: mise exec -- moon run :check
+      - name: version matches tag
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          if ! grep -q "\"version\": \"${TAG#v}\"" package.json; then
+            echo "::error file=package.json::version is not ${TAG#v}"
+            exit 1
+          fi
+      - name: release notes
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          # The CHANGELOG.md section for this version, without its heading.
+          awk -v v="${TAG#v}" 'index($0, "## [" v "]") == 1 {on=1; next} /^## / && on {exit} on && !/^\[.*\]: http/' CHANGELOG.md > notes.md
+          if ! grep -q '[^[:space:]]' notes.md; then echo "::error file=CHANGELOG.md::no section for ${TAG#v}"; exit 1; fi
+          cat notes.md
+      - name: publish
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ github.ref_name }}
+        run: |
+          mise exec -- bun pm pack --ignore-scripts
+          tarball="luau-web-checker-${TAG#v}.tgz"
+          test -f "$tarball"
+          cp dist/luau-checker.wasm dist/luau-checker.mjs .
+          sha256sum "$tarball" luau-checker.wasm luau-checker.mjs > SHA256SUMS
+          gh release create "$TAG" "$tarball" luau-checker.wasm luau-checker.mjs SHA256SUMS \
+            --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag

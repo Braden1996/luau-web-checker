@@ -1,0 +1,31 @@
+# Dependabot keeps the SHA-pinned GitHub Actions and the dev dependencies current. Tools (including Luau and
+# Emscripten) are pinned in mise.toml: bump by hand, then `mise lock` and `moon run :check`.
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    # Wait a week before proposing a release: compromised releases are usually yanked within days.
+    cooldown:
+      default-days: 7
+    groups:
+      actions:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope
+  - package-ecosystem: bun
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+    cooldown:
+      default-days: 7
+    groups:
+      dev:
+        patterns: ["*"]
+    commit-message:
+      prefix: build
+      include: scope

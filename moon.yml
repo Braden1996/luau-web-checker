@@ -1,0 +1,122 @@
+$schema: "./.moon/cache/schemas/project.json"
+
+# The one project. `build-wasm` is the slow step (Luau's Analysis through Emscripten, a few minutes cold); its
+# inputs are the wrapper, the build script and the tool pins, so a docs-only change does not rebuild it locally.
+layer: "library"
+tags: ["typescript", "wasm"]
+
+taskOptions:
+  shell: false
+  runFromWorkspaceRoot: true
+
+fileGroups:
+  typescript: [
+    "/src/**/*",
+    "/tests/**/*",
+    "/scripts/**/*",
+    "/*.config.ts",
+    "/tsconfig*.json",
+    "/package.json",
+    "/bun.lock",
+  ]
+
+tasks:
+  install:
+    description: "bun install from bun.lock (frozen)"
+    command: "bun"
+    args: ["install", "--frozen-lockfile"]
+    inputs: ["/package.json", "/bun.lock"]
+    options:
+      cache: false
+  build-wasm:
+    description: "Luau's Analysis and wasm/checker.cpp to dist/luau-checker.{mjs,wasm} with the pinned Emscripten"
+    command: "bun"
+    args: ["scripts/build-wasm.ts"]
+    inputs: ["/wasm/**/*", "/scripts/build-wasm.ts", "/mise.toml", "/mise.lock"]
+    outputs: ["/dist/luau-checker.mjs", "/dist/luau-checker.wasm", "/dist/LICENSE-luau.txt"]
+  build-ts:
+    description: "src/ to dist/index.{js,d.ts} (tsc), plus the WebAssembly module's declarations"
+    command: "bun"
+    args: ["run", "build:ts"]
+    deps: ["~:install"]
+    inputs: ["/src/**/*", "/scripts/copy-types.ts", "/tsconfig*.json"]
+    outputs: ["/dist/index.js", "/dist/index.d.ts", "/dist/luau-checker.d.mts"]
+  build:
+    description: "The whole package in dist/"
+    deps: ["~:build-wasm", "~:build-ts"]
+  typecheck:
+    description: "tsc over the library, tests, scripts and configs"
+    command: "bun"
+    args: ["run", "typecheck"]
+    deps: ["~:build"]
+    inputs: ["@group(typescript)"]
+  lint:
+    description: "oxlint, type-aware (oxlint-tsgolint), with the TypeScript errors in the same pass"
+    command: "bun"
+    args: ["run", "lint"]
+    deps: ["~:build"]
+    inputs: ["@group(typescript)", "/oxlint.config.ts"]
+  fmt:
+    description: "Format TypeScript with oxfmt"
+    command: "bun"
+    args: ["run", "fmt"]
+    deps: ["~:install"]
+    options:
+      cache: false
+  fmt-check:
+    description: "oxfmt check (run `moon run repo:fmt` to fix)"
+    command: "bun"
+    args: ["run", "fmt:check"]
+    deps: ["~:install"]
+    inputs: ["@group(typescript)", "/oxfmt.config.ts"]
+  test:
+    description: "Agreement with luau-lsp on tests/fixtures, and the editor queries (bun test)"
+    command: "bun"
+    args: ["test"]
+    deps: ["~:build"]
+    inputs: ["@group(typescript)", "/tests/fixtures/**/*", "/dist/**/*"]
+  pack:
+    description: "The npm tarball holds exactly the files the package needs"
+    command: "bun"
+    args: ["scripts/check-pack.ts"]
+    deps: ["~:build"]
+    inputs: ["/package.json", "/scripts/check-pack.ts", "/README.md", "/LICENSE"]
+  typos:
+    description: "Spelling (_typos.toml)"
+    command: "typos"
+    inputs: ["/**/*"]
+    options:
+      cache: false
+  actionlint:
+    description: "GitHub workflow lint"
+    command: "actionlint"
+    inputs: ["/.github/workflows/**/*"]
+  zizmor:
+    description: "GitHub Actions security audit (pinned actions, permissions, injection)"
+    command: "zizmor"
+    args: ["--offline", "--min-severity", "low", ".github"]
+    inputs: ["/.github/**/*"]
+  dprint-fmt:
+    description: "Format Markdown, JSON, YAML and TOML (dprint.json)"
+    command: "dprint"
+    args: ["fmt"]
+    options:
+      cache: false
+  dprint-check:
+    description: "dprint check: Markdown, JSON, YAML and TOML (run `moon run repo:dprint-fmt` to fix)"
+    command: "dprint"
+    args: ["check"]
+    inputs: ["/**/*.{md,json,yml,yaml,toml}", "/dprint.json"]
+  check:
+    description: "Aggregator: the gate"
+    deps: [
+      "~:typecheck",
+      "~:lint",
+      "~:fmt-check",
+      "~:test",
+      "~:pack",
+      "~:typos",
+      "~:actionlint",
+      "~:zizmor",
+      "~:dprint-check",
+    ]

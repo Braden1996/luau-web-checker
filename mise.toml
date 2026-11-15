@@ -1,0 +1,31 @@
+# Pinned tools. `mise install` installs exactly these versions; mise.lock records their checksums.
+# Bump a tool by editing its version here, then `mise lock` and `moon run :check`.
+min_version = "2026.11.2"
+
+[settings]
+lockfile = true
+experimental = true
+
+[tools]
+"aqua:moonrepo/moon" = "2.6.5" # task runner: `moon run :check` is the gate
+"bun" = "1.4.4" # package manager, build scripts and tests
+
+# The Luau release that is compiled. Keep it equal to the one luau-lsp pins (its `luau` submodule); the agreement
+# tests compare this checker's diagnostics with luau-lsp's, so a mismatch fails them.
+"http:luau-source" = { version = "0.740", url = "https://github.com/luau-lang/luau/archive/refs/tags/{{version}}.tar.gz", strip_components = 1 }
+"github:JohnnyMorganz/luau-lsp" = "1.70.1" # the reference the agreement tests compare with (pins Luau 0.740)
+
+# The WebAssembly toolchain. emsdk's scripts are pinned here; `scripts/build-wasm.ts` runs `emsdk.py install` for the
+# same version, which downloads that release's prebuilt LLVM, Binaryen, Emscripten and Node.
+# (mise's own `emsdk` backend fails on Windows, so the scripts come through the `http` backend instead.)
+"http:emsdk" = { version = "6.0.13", url = "https://github.com/emscripten-core/emsdk/archive/refs/tags/{{version}}.tar.gz", strip_components = 1 }
+"python" = "3.13.9" # runs emsdk
+"aqua:Kitware/CMake" = "4.5.0"
+"aqua:ninja-build/ninja" = "1.13.2"
+
+"aqua:crate-ci/typos" = "1.52.2"
+"aqua:rhysd/actionlint" = "1.7.12"
+"aqua:zizmorcore/zizmor" = "1.32.0" # GitHub Actions security lint
+"aqua:koalaman/shellcheck" = "0.11.0" # used by actionlint for run: scripts
+"aqua:dprint/dprint" = "0.64.3" # Markdown, JSON, YAML and TOML formatting
+"aqua:evilmartians/lefthook" = "2.2.2" # git hooks

@@ -1,0 +1,10 @@
+[files]
+extend-exclude = [
+  "dist/",
+  ".build/",
+  "node_modules/",
+  "bun.lock",
+  "mise.lock",
+  # Misspelt names on purpose (`"Buton"`, `"OnClik"`): each line must be a type error.
+  "tests/fixtures/widgets/errors.luau",
+]

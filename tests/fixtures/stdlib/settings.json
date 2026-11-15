@@ -1,0 +1,3 @@
+{
+  "luau-lsp.types.disabledGlobals": ["os", "debug", "table.clone", "string.pack", "notAGlobal", "math.notAMember"]
+}

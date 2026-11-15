@@ -1,0 +1,51 @@
+{
+  "name": "luau-web-checker",
+  "version": "0.1.0",
+  "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, with your definitions files.",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Braden1996/luau-web-checker.git"
+  },
+  "license": "MIT",
+  "author": "Braden Marshall",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./luau-checker.wasm": "./dist/luau-checker.wasm",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "dist/index.js",
+    "dist/index.d.ts",
+    "dist/luau-checker.mjs",
+    "dist/luau-checker.d.mts",
+    "dist/luau-checker.wasm",
+    "dist/LICENSE-luau.txt"
+  ],
+  "scripts": {
+    "build:wasm": "bun scripts/build-wasm.ts",
+    "build:ts": "tsc -p tsconfig.build.json && bun scripts/copy-types.ts",
+    "build": "bun run build:wasm && bun run build:ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "lint": "oxlint --type-aware --deny-warnings",
+    "fmt": "oxfmt --write",
+    "fmt:check": "oxfmt --check",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "1.4.4",
+    "oxfmt": "0.78.0",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2007",
+    "typescript": "7.0.2"
+  },
+  "packageManager": "bun@1.4.4",
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=22"
+  }
+}
