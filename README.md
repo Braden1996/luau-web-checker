@@ -25,7 +25,7 @@ luau-lsp's answers.
 
 | Build   | Luau                                                          | Reference       | Emscripten |
 | ------- | ------------------------------------------------------------- | --------------- | ---------- |
-| `0.2.x` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
+| `0.3.x` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
 
 ## Install
 
@@ -33,7 +33,7 @@ Releases are attached to [GitHub releases](https://github.com/Braden1996/luau-we
 tarball. Install it by URL, and your lockfile records its integrity hash:
 
 ```sh
-bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.2.0/luau-web-checker-0.2.0.tgz
+bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.3.0/luau-web-checker-0.3.0.tgz
 ```
 
 The package is about 3.3 MB, almost all of it the `.wasm` file (about 1 MB compressed).
@@ -114,8 +114,9 @@ links, such as to an API reference, and `tooltips: false` to render the cards yo
 | `options.definitions`                            | `{ "@name": source }`, loaded in order: the `--definitions=@name=file` of luau-lsp.                                                                                                                  |
 | `options.disabledGlobals`                        | Globals (`os`) or library members (`table.clone`) to remove, as luau-lsp's `types.disabledGlobals` does. Names that match nothing are listed in `checker.unknownGlobals`, where luau-lsp would warn. |
 | `options.strict`                                 | Treat modules without a `--!strict` or `--!nonstrict` comment as strict. The default is nonstrict, like luau-lsp.                                                                                    |
+| `options.aliases`                                | `.luaurc` aliases: `{ "@pkg": "vendor/pkg/src" }` makes `require("@pkg/Thing")` find the module `vendor/pkg/src/Thing.luau`.                                                                         |
 | `options.wasm`                                   | The `.wasm` URL or bytes. Without it, every checker shares one instance of the module.                                                                                                               |
-| `setSource(name, source)` / `removeSource(name)` | Adds, replaces or removes a module.                                                                                                                                                                  |
+| `setSource(name, source)` / `removeSource(name)` | Adds, replaces or removes a module, named by its path (`src/util.luau`), which `require` resolves.                                                                                                   |
 | `check(name)`                                    | Type errors, syntax errors and lint warnings, sorted by position.                                                                                                                                    |
 | `hovers(name)`                                   | Every identifier with its type, in source order (call after `check`).                                                                                                                                |
 | `typeAt(name, position)`                         | The hover type at a position, or `undefined`.                                                                                                                                                        |
@@ -128,9 +129,10 @@ links, such as to an API reference, and `tooltips: false` to render the cards yo
 
 ## Limits
 
-- **No `require`.** Modules cannot import each other, because there is no module resolution. Code that shares
-  globals and types through a definitions file works.
-- **No `.luaurc`.** The mode comes from each module's comment or from `strict`. Lint settings are Luau's defaults.
+- **Modules are named, not read.** `require` follows Luau's require-by-string rules (`./`, `../` and `.luaurc`-style
+  `@alias/` paths) over the modules you add with `setSource`; nothing is read from disk.
+- **No `.luaurc` files.** Pass its aliases with `aliases`. The mode comes from each module's comment or from
+  `strict`, and lint settings are Luau's defaults.
 - **Startup cost.** A 1.7 MB definitions file loads in about 4 seconds. After that, each check takes milliseconds.
 - **Types are shown as the solver has them.** Luau 0.740 sometimes leaves a union unsimplified (`(T | T)?`), and the
   checker does not rewrite it.

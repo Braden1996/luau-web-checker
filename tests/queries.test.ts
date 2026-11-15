@@ -74,6 +74,50 @@ describe("complete", () => {
   });
 });
 
+describe("require", () => {
+  const LIB = "--!strict\nlocal M = {}\nfunction M.twice(n: number): number\n\treturn n * 2\nend\nreturn M\n";
+
+  test("relative and alias paths find modules by their names", async () => {
+    const withAlias = await Checker.create({ aliases: { "@lib": "vendor/lib" } });
+    try {
+      withAlias.setSource("vendor/lib/Maths.luau", LIB);
+      withAlias.setSource(
+        "src/main.luau",
+        '--!strict\nlocal a = require("../vendor/lib/Maths")\nlocal b = require("@lib/Maths")\nlocal x: number = a.twice(b.twice(1))\nreturn x\n',
+      );
+      expect(withAlias.check("src/main.luau")).toEqual([]);
+      expect(withAlias.typeAt("src/main.luau", { line: 2, column: 7 })).toBe("M"); // the module table, named after its local
+    } finally {
+      withAlias.dispose();
+    }
+  });
+
+  test("a missing module is an error, and adding it later fixes the requirer", async () => {
+    const fresh = await Checker.create();
+    try {
+      fresh.setSource("main.luau", '--!strict\nlocal m = require("./Later")\nlocal x: number = m.twice(2)\nreturn x\n');
+      const before = fresh.check("main.luau");
+      expect(before.map((d) => d.message)).toContain("Unknown require: unsupported path");
+      fresh.setSource("Later.luau", LIB);
+      expect(fresh.check("main.luau")).toEqual([]);
+    } finally {
+      fresh.dispose();
+    }
+  });
+
+  test("a required module's own errors are not the requirer's", async () => {
+    const fresh = await Checker.create();
+    try {
+      fresh.setSource("bad.luau", "--!strict\nlocal n: number = 'x'\nreturn n\n");
+      fresh.setSource("main.luau", '--!strict\nlocal n = require("./bad")\nreturn n\n');
+      expect(fresh.check("main.luau")).toEqual([]);
+      expect(fresh.check("bad.luau")).toHaveLength(1);
+    } finally {
+      fresh.dispose();
+    }
+  });
+});
+
 describe("options", () => {
   test("strict makes unannotated modules strict", async () => {
     const strict = await Checker.create({ strict: true });

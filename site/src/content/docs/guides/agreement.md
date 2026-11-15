@@ -38,7 +38,10 @@ code and expected-failure files on every pull request.
 
 There are none in diagnostics. Where the checker and luau-lsp differ, it is in what luau-lsp does around the checker:
 
-- **Module resolution.** `require` is not resolved.
+- **Module resolution.** `require` resolves by Luau's require-by-string rules over the modules you add, by name.
+  luau-lsp reads files and `.luaurc` from disk; the checker reads nothing, and takes aliases as an option. A
+  `require` that finds nothing is reported as `Unknown require: unsupported path`, where luau-lsp names the missing
+  file.
 - **`.luaurc`.** Configuration files are not read. The mode comes from each module's comment or the `strict` option.
 - **Hover text.** Hover strings come from Luau's `toString`, with parameter names. luau-lsp's hover adds Markdown and
   documentation around the same type.

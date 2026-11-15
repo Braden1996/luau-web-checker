@@ -19,15 +19,55 @@
 #include <memory>
 #include <optional>
 #include <string>
+#include <set>
+#include <vector>
 
 LUAU_FASTFLAG(LuauSolverV2)
 
 namespace
 {
 
+// Joins and normalises slash-separated module paths: `a/b/../c` is `a/c`, `./x` is `x`. A `..` above the root stays.
+std::string normalisePath(const std::string& path)
+{
+    std::vector<std::string> parts;
+    size_t start = 0;
+    while (start <= path.size())
+    {
+        size_t end = path.find('/', start);
+        if (end == std::string::npos)
+            end = path.size();
+        std::string part = path.substr(start, end - start);
+        if (part == "..")
+        {
+            if (!parts.empty() && parts.back() != "..")
+                parts.pop_back();
+            else
+                parts.push_back(part);
+        }
+        else if (!part.empty() && part != ".")
+            parts.push_back(part);
+        start = end + 1;
+    }
+    std::string out;
+    for (const std::string& part : parts)
+        out += (out.empty() ? "" : "/") + part;
+    return out;
+}
+
+std::string directoryOf(const std::string& name)
+{
+    size_t slash = name.rfind('/');
+    return slash == std::string::npos ? "" : name.substr(0, slash);
+}
+
 struct MemoryResolver : Luau::FileResolver, Luau::ConfigResolver
 {
     std::map<std::string, std::string> sources;
+    // `@alias` -> the module directory it stands for (`.luaurc` aliases).
+    std::map<std::string, std::string> aliases;
+    // Modules with a `require` that found nothing; a later setSource may provide it.
+    std::set<std::string> unresolvedFrom;
     Luau::Config config;
 
     std::optional<Luau::SourceCode> readSource(const Luau::ModuleName& name) override
@@ -38,8 +78,38 @@ struct MemoryResolver : Luau::FileResolver, Luau::ConfigResolver
         return Luau::SourceCode{it->second, Luau::SourceCode::Module};
     }
 
-    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo*, Luau::AstExpr*, const Luau::TypeCheckLimits&) override
+    // Luau's require-by-string, over the modules added with setSource: `./x` and `../x` are relative to the requiring
+    // module's folder, `@alias/x` to the alias's folder; `x` names `x.luau`, `x.lua`, `x/init.luau` or `x/init.lua`.
+    std::optional<Luau::ModuleInfo> resolveModule(const Luau::ModuleInfo* context, Luau::AstExpr* node, const Luau::TypeCheckLimits&) override
     {
+        auto* expr = node->as<Luau::AstExprConstantString>();
+        if (!expr)
+            return std::nullopt;
+        std::string path(expr->value.data, expr->value.size);
+        std::string base;
+        if (path.rfind("./", 0) == 0 || path.rfind("../", 0) == 0)
+            base = context ? directoryOf(context->name) : "";
+        else if (!path.empty() && path[0] == '@')
+        {
+            size_t slash = path.find('/');
+            auto alias = aliases.find(path.substr(0, slash));
+            if (alias == aliases.end())
+                return std::nullopt;
+            base = alias->second;
+            path = slash == std::string::npos ? "" : path.substr(slash + 1);
+        }
+        else
+            return std::nullopt;
+
+        std::string target = normalisePath(base.empty() ? path : base + "/" + path);
+        for (const char* suffix : {".luau", ".lua", "/init.luau", "/init.lua"})
+        {
+            std::string candidate = target + suffix;
+            if (sources.count(candidate))
+                return Luau::ModuleInfo{candidate};
+        }
+        if (context)
+            unresolvedFrom.insert(context->name);
         return std::nullopt;
     }
 
@@ -307,8 +377,24 @@ public:
     void setSource(const std::string& name, const std::string& source)
     {
         freeze();
+        bool added = resolver.sources.count(name) == 0;
         resolver.sources[name] = source;
         frontend->markDirty(name);
+        // A new module may be what an earlier `require` failed to find: check those modules again.
+        if (added)
+        {
+            for (const std::string& requirer : resolver.unresolvedFrom)
+                frontend->markDirty(requirer);
+            resolver.unresolvedFrom.clear();
+        }
+    }
+
+    // `.luaurc`-style alias: `require("@name/x")` looks for `x` under `directory` (a module path prefix).
+    void setAlias(const std::string& name, const std::string& directory)
+    {
+        resolver.aliases[name.rfind('@', 0) == 0 ? name : "@" + name] = normalisePath(directory);
+        for (const auto& [module, _] : resolver.sources)
+            frontend->markDirty(module);
     }
 
     void removeSource(const std::string& name)
@@ -327,6 +413,8 @@ public:
             Luau::CheckResult result = frontend->check(name);
             for (const auto& error : result.errors)
             {
+                if (error.moduleName != name)
+                    continue; // a required module's own errors belong to that module's check
                 const char* kind = Luau::get_if<Luau::SyntaxError>(&error.data) ? "SyntaxError" : "TypeError";
                 appendDiagnostic(out, error.moduleName, error.location, kind, typeErrorText(error, &resolver));
             }
@@ -474,6 +562,7 @@ EMSCRIPTEN_BINDINGS(luau_checker)
         .function("disableGlobal", &Checker::disableGlobal)
         .function("setSource", &Checker::setSource)
         .function("removeSource", &Checker::removeSource)
+        .function("setAlias", &Checker::setAlias)
         .function("check", &Checker::check)
         .function("setStrict", &Checker::setStrict)
         .function("typeAt", &Checker::typeAt)

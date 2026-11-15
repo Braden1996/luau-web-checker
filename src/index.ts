@@ -63,6 +63,8 @@ export interface CheckerOptions {
   readonly disabledGlobals?: readonly string[];
   /** Check modules without a `--!strict`/`--!nonstrict` comment in strict mode (luau-lsp's default is nonstrict). */
   readonly strict?: boolean;
+  /** `.luaurc` aliases: `{ "@pkg": "vendor/pkg/src" }` makes `require("@pkg/Thing")` find `vendor/pkg/src/Thing.luau`. */
+  readonly aliases?: Readonly<Record<string, string>>;
   readonly wasm?: WasmSource;
 }
 
@@ -186,6 +188,9 @@ export class Checker {
       }
       const unknown = (options.disabledGlobals ?? []).filter((name) => !native.disableGlobal(name));
       native.setStrict(options.strict ?? false);
+      for (const [alias, directory] of Object.entries(options.aliases ?? {})) {
+        native.setAlias(alias, directory);
+      }
       return new Checker(native, unknown);
     } catch (error) {
       native.delete();
@@ -193,7 +198,10 @@ export class Checker {
     }
   }
 
-  /** Adds or replaces a module's source. Modules cannot `require` each other (there is no module resolution). */
+  /**
+   * Adds or replaces a module. Its name is its path (`src/util.luau`): `require("./util")` from a module in `src/`
+   * finds it, as do `../` paths and `@alias/` paths (see `aliases`). The names are not files; nothing is read from disk.
+   */
   setSource(name: string, source: string): void {
     this.#live().setSource(name, source);
   }

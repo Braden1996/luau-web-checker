@@ -30,6 +30,7 @@ checker.dispose();
   `--definitions=@name=file`. A file with errors throws a `DefinitionsError`, which carries the diagnostics.
 - **`disabledGlobals`**: luau-lsp's `types.disabledGlobals`. It removes whole globals (`os`) or library members
   (`table.clone`). Names that match nothing are listed in `checker.unknownGlobals`.
+- **`aliases`**: `.luaurc` aliases for `require`, such as `{ "@pkg": "vendor/pkg/src" }`.
 - **`strict`**: the mode for modules with no `--!strict` or `--!nonstrict` comment. The default is nonstrict, as in
   luau-lsp.
 - **`wasm`**: where the `.wasm` comes from, as a URL or bytes. See [in the browser](/luau-web-checker/guides/browser/).
@@ -47,3 +48,18 @@ Positions are **1-based**, and a range ends one past its last column, as luau-ls
 
 Call `check` before `hovers` or `typeAt`. Loading definitions is the slow part: a 1.7 MB file takes about four
 seconds. So create one checker and reuse it for every module.
+
+## Modules and `require`
+
+A module's name is its path. `require` finds other modules by Luau's require-by-string rules: `./` and `../`
+relative to the requiring module, and `@alias/` through `aliases`. Nothing is read from disk, so add every module
+the code needs:
+
+```ts
+const checker = await Checker.create({ aliases: { "@lib": "vendor/lib" } });
+checker.setSource("vendor/lib/Maths.luau", "local M = {}\nfunction M.twice(n: number) return n * 2 end\nreturn M\n");
+checker.setSource("src/main.luau", 'local Maths = require("@lib/Maths")\nprint(Maths.twice(21))\n');
+checker.check("src/main.luau"); // []
+```
+
+`check(name)` reports that module's own errors. Check each module to see all of them.

@@ -11,8 +11,9 @@ description: Every export of luau-web-checker and luau-web-checker/expressive-co
 | `options.definitions`                            | `{ "@name": source }`, loaded in order.                                                                                   |
 | `options.disabledGlobals`                        | Globals or library members to remove. Names that match nothing end up in `checker.unknownGlobals`.                        |
 | `options.strict`                                 | Strict mode for modules without a mode comment (default `false`, as in luau-lsp).                                         |
+| `options.aliases`                                | `.luaurc` aliases: `{ "@pkg": "vendor/pkg/src" }` lets `require("@pkg/Thing")` find `vendor/pkg/src/Thing.luau`.          |
 | `options.wasm`                                   | The `.wasm` URL or bytes. Without it, every checker shares one instance of the module.                                    |
-| `setSource(name, source)` / `removeSource(name)` | Adds, replaces or removes a module.                                                                                       |
+| `setSource(name, source)` / `removeSource(name)` | Adds, replaces or removes a module, named by its path, which `require` finds.                                             |
 | `check(name)`                                    | `Diagnostic[]`: type errors, syntax errors and lint warnings, sorted by position.                                         |
 | `hovers(name)`                                   | `Hover[]`: every identifier with its type, in source order.                                                               |
 | `typeAt(name, position)`                         | The hover type at a position, or `undefined`.                                                                             |
