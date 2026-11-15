@@ -25,7 +25,7 @@ luau-lsp's answers.
 
 | Build   | Luau                                                          | Reference       | Emscripten |
 | ------- | ------------------------------------------------------------- | --------------- | ---------- |
-| `0.3.x` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
+| `0.4.x` | [0.740](https://github.com/luau-lang/luau/releases/tag/0.740) | luau-lsp 1.70.1 | 6.0.13     |
 
 ## Install
 
@@ -33,7 +33,7 @@ Releases are attached to [GitHub releases](https://github.com/Braden1996/luau-we
 tarball. Install it by URL, and your lockfile records its integrity hash:
 
 ```sh
-bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.3.0/luau-web-checker-0.3.0.tgz
+bun add https://github.com/Braden1996/luau-web-checker/releases/download/v0.4.0/luau-web-checker-0.4.0.tgz
 ```
 
 The package is about 3.3 MB, almost all of it the `.wasm` file (about 1 MB compressed).
@@ -101,10 +101,14 @@ Inside a block:
 - **` ```luau nocheck `** skips a block. A block with a top-level `declare` is a definitions file and is shown as
   written.
 
-Hovering an identifier shows its type, and a type function shows what it resolves to: the `Handler` in
+Hovering an identifier shows its type the way [prettify-ts](https://github.com/mylesmmurphy/prettify-ts) does for
+TypeScript: expanded (aliases unfolded, intersections of tables merged into one), laid out one field per line, and
+highlighted in the site's own code theme, with the declared form (`type AB = A & B`) underneath. A type function
+shows what it resolves to: the `Handler` in
 `local h: Handler<"resize">` shows `(width: number, height: number) -> ()`. Pass `link` to turn identifiers into
 links, such as to an API reference, and `tooltips: false` to render the cards yourself from the `data-luau-type` and
-`data-luau-error` attributes.
+`data-luau-error` attributes. Each identifier also holds its highlighted view as hidden `.luau-popup` markup (spans
+with `luau-t-<kind>` classes), ready to show in your own card.
 
 To adopt it gradually, pass `check: "marked"`, and only blocks marked ` ```luau check ` are checked, as Twoslash is
 opted into. Pass `prelude` for hidden setup that every block needs, such as `local Result = require("./Result")`.
@@ -129,6 +133,8 @@ opted into. Pass `prelude` for hidden setup that every block needs, such as `loc
 | `loadModule(wasm?)`                              | The raw Emscripten module, for advanced use.                                                                                                                                                         |
 
 `luau-web-checker/expressive-code` exports `pluginLuauTypes`, and also `checkSnippet` for checking a block yourself.
+`luau-web-checker/pretty` (no WebAssembly) exports the hover formatter: `hoverView(hover)` gives the expanded and
+declared forms as highlighted token lines, and `formatType` lays out any type Luau prints.
 
 ## Limits
 

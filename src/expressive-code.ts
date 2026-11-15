@@ -15,8 +15,11 @@ import { definePlugin, ExpressiveCodeAnnotation } from "@expressive-code/core";
 import { h } from "@expressive-code/core/hast";
 
 import type { Checker, Diagnostic, Hover } from "./index.ts";
+import type { HoverView, TokenLines } from "./pretty.ts";
+import { hoverView } from "./pretty.ts";
 import { checkSnippet, hoverLabel, isDefinitionsFile, isTrivialHover } from "./snippets.ts";
-import { BASE_STYLES, TOOLTIP_STYLES, tooltipScript } from "./tooltips.ts";
+import { baseStyles, luauTypesStyleSettings } from "./styles.ts";
+import { tooltipScript } from "./tooltips.ts";
 
 export { CUT, checkSnippet, hoverLabel, isDefinitionsFile, isTrivialHover, SnippetError } from "./snippets.ts";
 export type { CheckedSnippet } from "./snippets.ts";
@@ -47,15 +50,34 @@ export interface LuauTypesOptions {
 }
 
 type Rendered = ReturnType<ExpressiveCodeAnnotation["render"]>;
+type HastElement = ReturnType<typeof h>;
+
+function codeLines(className: string, lines: TokenLines): HastElement {
+  const children = lines.flatMap((line, index) => [
+    ...line.map((token) => (token.kind === "text" ? token.text : h(`span.luau-t-${token.kind}`, token.text))),
+    ...(index < lines.length - 1 ? ["\n"] : []),
+  ]);
+  return h(`span.${className}`, children);
+}
+
+// The hover's highlighted view, hidden inside the identifier; the tooltip script shows a copy of it.
+function popup(view: HoverView): HastElement {
+  return h("span.luau-popup", { "aria-hidden": "true" }, [
+    codeLines("luau-popup-main", view.main),
+    ...(view.declared === undefined ? [] : [codeLines("luau-popup-declared", view.declared)]),
+  ]);
+}
 
 class LuauHoverAnnotation extends ExpressiveCodeAnnotation {
   override readonly name = "luau-hover";
   readonly #label: string;
+  readonly #view: HoverView;
   readonly #link: HoverLink | undefined;
 
   constructor(hover: Hover, link: HoverLink | undefined) {
     super({ inlineRange: { columnStart: hover.column - 1, columnEnd: hover.endColumn - 1 } });
     this.#label = hoverLabel(hover);
+    this.#view = hoverView(hover);
     this.#link = link;
   }
 
@@ -63,8 +85,11 @@ class LuauHoverAnnotation extends ExpressiveCodeAnnotation {
     const link = this.#link;
     return nodesToTransform.map((node) =>
       link === undefined
-        ? h("span.luau-hover", { "data-luau-type": this.#label, tabindex: 0 }, [node])
-        : h("a.luau-link", { href: link.href, "data-luau-type": this.#label, ...link.attributes }, [node]),
+        ? h("span.luau-hover", { "data-luau-type": this.#label, tabindex: 0 }, [node, popup(this.#view)])
+        : h("a.luau-link", { href: link.href, "data-luau-type": this.#label, ...link.attributes }, [
+            node,
+            popup(this.#view),
+          ]),
     );
   }
 }
@@ -101,7 +126,8 @@ export function pluginLuauTypes(options: LuauTypesOptions): ExpressiveCodePlugin
   let blocks = 0;
   return definePlugin({
     name: "luau-types",
-    baseStyles: tooltips ? BASE_STYLES + TOOLTIP_STYLES : BASE_STYLES,
+    styleSettings: luauTypesStyleSettings,
+    baseStyles: (context) => baseStyles(context, tooltips),
     jsModules: tooltips ? [`(${tooltipScript.toString()})();`] : [],
     hooks: {
       async preprocessCode({ codeBlock }) {

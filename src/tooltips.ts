@@ -26,16 +26,32 @@ export function tooltipScript(): void {
   };
 
   const show = (anchor: HTMLElement): void => {
-    const block = anchor.closest(".expressive-code") ?? document.body;
-    tip ??= document.createElement("div");
-    if (tip.parentElement !== block) {
-      block.append(tip);
+    if (tip === undefined) {
+      // On <body>, so no code block's stacking context can paint over it; the host carries Expressive Code's class
+      // (and the block's theme), so the plugin's scoped styles and theme colours still apply.
+      const host = document.createElement("div");
+      host.className = "expressive-code luau-tooltip-host";
+      tip = document.createElement("div");
+      host.append(tip);
+      document.body.append(host);
+    }
+    const theme = anchor.closest(".expressive-code")?.getAttribute("data-theme");
+    if (theme === null || theme === undefined) {
+      tip.parentElement?.removeAttribute("data-theme");
+    } else {
+      tip.parentElement?.setAttribute("data-theme", theme);
     }
     current = anchor;
     const error = anchor.dataset["luauError"];
     tip.className = error === undefined ? "luau-tooltip" : "luau-tooltip luau-tooltip-error";
     tip.setAttribute("role", "tooltip");
-    tip.textContent = error ?? anchor.dataset["luauType"] ?? "";
+    // The highlighted view is pre-rendered at build time, hidden inside the identifier; fall back to the plain label.
+    const popup = error === undefined ? anchor.querySelector(":scope > .luau-popup") : null;
+    if (popup === null) {
+      tip.textContent = error ?? anchor.dataset["luauType"] ?? "";
+    } else {
+      tip.replaceChildren(...[...popup.childNodes].map((node) => node.cloneNode(true)));
+    }
     tip.hidden = false;
     const rect = anchor.getBoundingClientRect();
     const width = tip.offsetWidth;
@@ -69,27 +85,3 @@ export function tooltipScript(): void {
   });
   window.addEventListener("scroll", hide, { passive: true });
 }
-
-/** Styles for the hoverable identifiers, error underlines and tooltips (scoped to code blocks by Expressive Code). */
-export const BASE_STYLES = `
-  .luau-hover, .luau-link { cursor: help; color: inherit; text-decoration: none; }
-  .luau-hover:hover, .luau-hover:focus-visible, .luau-link:hover, .luau-link:focus-visible {
-    text-decoration: underline dotted; text-underline-offset: 3px;
-  }
-  .luau-error {
-    cursor: help;
-    text-decoration: underline wavy #f85149; text-decoration-skip-ink: none; text-underline-offset: 3px;
-  }
-`;
-
-export const TOOLTIP_STYLES = `
-  .luau-tooltip {
-    position: fixed; z-index: 100; max-width: min(40rem, calc(100vw - 16px)); max-height: 16rem; overflow: auto;
-    margin: 0; padding: 0.4rem 0.6rem; border: 1px solid #3d444d; border-radius: 0.3rem;
-    background: #151b23; color: #e6edf3; box-shadow: 0 4px 16px rgb(0 0 0 / 0.35);
-    font-family: var(--ec-codeFontFml, ui-monospace, monospace); font-size: 0.8rem; line-height: 1.45;
-    white-space: pre-wrap; pointer-events: none;
-  }
-  .luau-tooltip[hidden] { display: none; }
-  .luau-tooltip-error { border-color: #f85149; }
-`;

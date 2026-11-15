@@ -61,6 +61,8 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
     --pg-number: #79c0ff;
     --pg-comment: #8b949e;
     --pg-function: #d2a8ff;
+    --pg-type: #ffa657;
+    --pg-property: #79c0ff;
     --pg-punctuation: #e6edf3;
   }
   :global(:root[data-theme="light"]) .pg {
@@ -76,6 +78,8 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
     --pg-number: #0550ae;
     --pg-comment: #59636e;
     --pg-function: #8250df;
+    --pg-type: #953800;
+    --pg-property: #0550ae;
     --pg-punctuation: #1f2328;
   }
   .pg {
@@ -122,10 +126,39 @@ import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
     min-height: 26rem;
     font-size: 0.85rem;
   }
+  /* Hover cards: the expanded type, then the declared form under a rule, like the code-block tooltips. */
   .pg-editor :global(.pg-hover) {
-    padding: 0.3rem 0.5rem;
+    max-width: 40rem;
+    max-height: 22rem;
+    overflow: auto;
     font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
     font-size: 0.8rem;
-    white-space: pre-wrap;
+    line-height: 1.5;
+  }
+  .pg-editor :global(.pg-hover-main),
+  .pg-editor :global(.pg-hover-declared) {
+    padding: 0.4rem 0.65rem;
+    white-space: pre;
+  }
+  .pg-editor :global(.pg-hover-declared) {
+    border-top: 1px solid var(--pg-border);
+  }
+  .pg-editor :global(.luau-t-keyword) {
+    color: var(--pg-keyword);
+  }
+  .pg-editor :global(.luau-t-type) {
+    color: var(--pg-type);
+  }
+  .pg-editor :global(.luau-t-builtin) {
+    color: var(--pg-number);
+  }
+  .pg-editor :global(.luau-t-property) {
+    color: var(--pg-property);
+  }
+  .pg-editor :global(.luau-t-string) {
+    color: var(--pg-string);
+  }
+  .pg-editor :global(.luau-t-punctuation) {
+    color: var(--pg-punctuation);
   }
 </style>

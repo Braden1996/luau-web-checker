@@ -5,6 +5,15 @@ All notable changes to this project are documented here. The format follows
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-11-15
+
+### Added
+
+- Pretty hover tooltips, after prettify-ts: each hover has an `expanded` form (aliases unfolded, intersections of tables
+  merged by Luau's normaliser), laid out one field per line and highlighted in the site's own code theme, with the
+  declared form underneath. The highlighted view is rendered at build time.
+- `luau-web-checker/pretty`: the hover formatter (`hoverView`, `formatType`, `highlightLine`), without WebAssembly.
+
 ## [0.3.0] - 2026-11-15
 
 ### Added
@@ -50,7 +59,8 @@ All notable changes to this project are documented here. The format follows
 - Definitions files, `disabledGlobals` (luau-lsp's `types.disabledGlobals`) and a `strict` default mode.
 - Agreement tests: every fixture's diagnostics must equal `luau-lsp analyze`'s.
 
-[Unreleased]: https://github.com/Braden1996/luau-web-checker/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/Braden1996/luau-web-checker/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/Braden1996/luau-web-checker/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/Braden1996/luau-web-checker/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/Braden1996/luau-web-checker/compare/v0.1.1...v0.2.0
 [0.1.1]: https://github.com/Braden1996/luau-web-checker/compare/v0.1.0...v0.1.1

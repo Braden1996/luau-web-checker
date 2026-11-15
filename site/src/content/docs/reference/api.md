@@ -40,7 +40,8 @@ interface Hover {
   endColumn: number;
   kind: "local" | "global" | "property" | "type";
   name: string;
-  type: string;
+  type: string; // as the solver names it: "A & B", "Point"
+  expanded: string; // aliases unfolded, table intersections merged: "{ a: string, b: { a: string } }"
 }
 
 interface Completion {
@@ -61,3 +62,16 @@ interface Completion {
 | `isTrivialHover(hover)`             | `true` for a builtin type name (`number`), whose hover would only repeat it.                          |
 | `isDefinitionsFile(code)`           | `true` when a block has a top-level `declare`.                                                        |
 | `CUT`                               | `"-- ---cut---"`.                                                                                     |
+
+## `luau-web-checker/pretty`
+
+The hover formatter, with no WebAssembly, for rendering hovers in a browser (the playground uses it).
+
+| Export                       | What it does                                                                                        |
+| ---------------------------- | --------------------------------------------------------------------------------------------------- |
+| `hoverView(hover)`           | `{ main, declared }`: the expanded form laid out, and the declared form when it differs, as tokens. |
+| `formatType(text, options?)` | Lays out a type (one table field per line) and splits it into highlighting tokens.                  |
+| `highlightLine(text)`        | Tokens for one line, without changing its layout.                                                   |
+| `linesToText(lines)`         | The plain text of token lines.                                                                      |
+
+A token is `{ text, kind }`, where `kind` is `keyword`, `type`, `builtin`, `property`, `string`, `punctuation` or `text`.
