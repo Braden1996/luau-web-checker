@@ -5,6 +5,6 @@ extend-exclude = [
   "node_modules/",
   "bun.lock",
   "mise.lock",
-  # Misspelt names on purpose (`"Buton"`, `"OnClik"`): each line must be a type error.
-  "tests/fixtures/widgets/errors.luau",
+  # Misspelt names on purpose (`"Buton"`, `"clik"`, `"redy"`): each line must be a type error.
+  "tests/fixtures/ui/errors.luau",
 ]

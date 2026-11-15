@@ -1,13 +1,20 @@
 // Checks the npm tarball (what the release attaches and consumers install) against the files the package needs:
-// the JavaScript, both declaration files, the WebAssembly and its glue, the readme and both licences.
+// the JavaScript and its declarations (the checker and the Expressive Code plugin), the WebAssembly and its glue, the
+// readme and both licences.
 
 const expected = [
   "LICENSE",
   "README.md",
   "package.json",
   "dist/LICENSE-luau.txt",
+  "dist/expressive-code.d.ts",
+  "dist/expressive-code.js",
   "dist/index.d.ts",
   "dist/index.js",
+  "dist/snippets.d.ts",
+  "dist/snippets.js",
+  "dist/tooltips.d.ts",
+  "dist/tooltips.js",
   "dist/luau-checker.d.mts",
   "dist/luau-checker.mjs",
   "dist/luau-checker.wasm",

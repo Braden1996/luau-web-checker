@@ -114,7 +114,7 @@ describe.each(fixtures)("fixture %s", (fixture) => {
       const marked = read(join(dir, name))
         .split("\n")
         .flatMap((text, index) => (text.includes("-- expect-error:") ? [index + 1] : []));
-      if (marked.length > 0 || fixture === "widgets") {
+      if (marked.length > 0 || fixture === "ui") {
         expect([...new Set(ours.map((d) => d.line))].toSorted((a, b) => a - b)).toEqual(marked);
       }
     } finally {

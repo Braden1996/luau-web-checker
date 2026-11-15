@@ -1,4 +1,4 @@
-// The editor queries (hovers, typeAt, complete) and the API's own behaviour, on the widgets fixture's definitions.
+// The editor queries (hovers, typeAt, complete) and the API's own behaviour, on the ui fixture's definitions.
 
 import { afterAll, beforeAll, describe, expect, test } from "bun:test";
 import { readFileSync } from "node:fs";
@@ -6,8 +6,8 @@ import { join } from "node:path";
 
 import { Checker, DefinitionsError, LUAU_VERSION } from "../dist/index.js";
 
-const api = readFileSync(join(import.meta.dir, "fixtures", "widgets", "api.d.luau"), "utf8");
-const ok = readFileSync(join(import.meta.dir, "fixtures", "widgets", "ok.luau"), "utf8").replaceAll("\r\n", "\n");
+const api = readFileSync(join(import.meta.dir, "fixtures", "ui", "api.d.luau"), "utf8");
+const ok = readFileSync(join(import.meta.dir, "fixtures", "ui", "ok.luau"), "utf8").replaceAll("\r\n", "\n");
 
 let checker: Checker;
 
@@ -27,27 +27,27 @@ const hoverAt = (line: number, name: string): string | undefined =>
 describe("hovers", () => {
   test("values get the solver's types", () => {
     expect(hoverAt(4, "button")).toBe("Button");
-    expect(hoverAt(6, "GetWidth")).toBe("(self: Region) -> number");
-    expect(hoverAt(8, "self")).toBe("Frame");
+    expect(hoverAt(6, "GetWidth")).toBe("(self: Node) -> number");
+    expect(hoverAt(8, "self")).toBe("Element");
   });
 
   test("a type function in an annotation shows what it resolves to", () => {
-    expect(hoverAt(14, "EventHandler")).toBe("(level: number, healthDelta: number) -> ()");
+    expect(hoverAt(14, "Handler")).toBe("(width: number, height: number) -> ()");
   });
 
   test("a declaration shows its initializer's type, refined uses show the refinement", () => {
     // The solver's own type for the call (Luau 0.740 leaves this union unsimplified); the checker does not rewrite it.
-    expect(hoverAt(19, "info")).toBe(
-      "((ItemBase & { quality: number, stackCount: number? }) | (ItemBase & { quality: number, stackCount: number? }))?",
+    expect(hoverAt(19, "user")).toBe(
+      "((Account & { age: number, email: string? }) | (Account & { age: number, email: string? }))?",
     );
-    expect(hoverAt(21, "info")).toBe("ItemBase & { quality: number, stackCount: number? }");
+    expect(hoverAt(21, "user")).toBe("Account & { age: number, email: string? }");
   });
 
   test("ranges are 1-based and cover the identifier", () => {
     const button = checker.hovers("ok.luau").find((hover) => hover.line === 4 && hover.name === "button");
     expect(button).toMatchObject({ kind: "local", column: 7, endLine: 4, endColumn: 13 });
-    const createFrame = checker.hovers("ok.luau").find((hover) => hover.line === 4 && hover.name === "CreateFrame");
-    expect(createFrame?.kind).toBe("global");
+    const create = checker.hovers("ok.luau").find((hover) => hover.line === 4 && hover.name === "createElement");
+    expect(create?.kind).toBe("global");
   });
 });
 
@@ -63,13 +63,13 @@ describe("typeAt", () => {
 });
 
 describe("complete", () => {
-  test("methods of a widget, inherited ones included", () => {
-    checker.setSource("partial.luau", '--!strict\nlocal b = CreateFrame("Button")\nb:Se');
+  test("methods of an extern type, inherited ones included", () => {
+    checker.setSource("partial.luau", '--!strict\nlocal b = createElement("Button")\nb:Se');
     checker.check("partial.luau");
     const labels = checker.complete("partial.luau", { line: 3, column: 5 }).map((entry) => entry.label);
-    expect(labels).toContain("SetText");
-    expect(labels).toContain("SetWidth");
-    expect(labels).toContain("SetScript");
+    expect(labels).toContain("SetLabel"); // Button's own
+    expect(labels).toContain("On"); // from Element
+    expect(labels).toContain("SetWidth"); // from Node
     checker.removeSource("partial.luau");
   });
 });

@@ -3,7 +3,7 @@
   // Emits the published JavaScript and declarations: src/index.ts -> dist/index.{js,d.ts}.
   "extends": "./tsconfig.json",
   "compilerOptions": {
-    "lib": ["ES2023", "DOM"],
+    "lib": ["ES2023", "ESNext.Disposable", "DOM"],
     "types": [],
     "noEmit": false,
     "declaration": true,

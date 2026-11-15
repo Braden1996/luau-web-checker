@@ -12,13 +12,14 @@
 
 ## Layout
 
-| Path                    | What                                                                                                   |
-| ----------------------- | ------------------------------------------------------------------------------------------------------ |
-| `wasm/checker.cpp`      | The C++ wrapper over Luau's `Frontend`. It sets up the solver as luau-lsp does and returns JSON.       |
-| `wasm/CMakeLists.txt`   | The Emscripten build (`-fwasm-exceptions`, embind, ES module output).                                  |
-| `scripts/build-wasm.ts` | Finds the pinned emsdk and Luau through `mise where`, installs Emscripten, runs CMake into `dist/`.    |
-| `src/index.ts`          | The typed TypeScript API over the embind class. It uses 1-based positions and checks every JSON entry. |
-| `tests/fixtures/`       | The agreement fixtures (see `tests/agreement.test.ts`).                                                |
+| Path                     | What                                                                                                     |
+| ------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `wasm/checker.cpp`       | The C++ wrapper over Luau's `Frontend`. It sets up the solver as luau-lsp does and returns JSON.         |
+| `wasm/CMakeLists.txt`    | The Emscripten build (`-fwasm-exceptions`, embind, ES module output).                                    |
+| `scripts/build-wasm.ts`  | Finds the pinned emsdk and Luau through `mise where`, installs Emscripten, runs CMake into `dist/`.      |
+| `src/index.ts`           | The typed TypeScript API over the embind class. It uses 1-based positions and checks every JSON entry.   |
+| `src/expressive-code.ts` | The Expressive Code plugin; `src/snippets.ts` has the block conventions, `src/tooltips.ts` the tooltips. |
+| `tests/fixtures/`        | The agreement fixtures (see `tests/agreement.test.ts`).                                                  |
 
 ## Changing the checker
 

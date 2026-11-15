@@ -1,5 +1,4 @@
-// oxfmt for the TypeScript: the settings of the wow-forever-luau-types docs site (Higher monorepo style), with
-// its import grouping.
+// oxfmt for the TypeScript (Higher monorepo style), with its import grouping.
 
 import type { OxfmtConfig } from "oxfmt";
 
