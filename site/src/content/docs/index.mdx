@@ -1,0 +1,55 @@
+---
+title: luau-web-checker
+description: Luau's own type checker, new solver, compiled to WebAssembly. Checked, hoverable Luau code in docs sites, browsers, Node and Bun.
+template: splash
+hero:
+  tagline: Luau's own type checker, with the new solver, compiled to WebAssembly. Hover the code below. Every Luau example on this site was checked when the site was built.
+  image:
+    file: ../../assets/logo.svg
+  actions:
+    - text: Introduction
+      link: start/introduction/
+      icon: right-arrow
+    - text: Playground
+      link: playground/
+      variant: minimal
+    - text: GitHub
+      link: https://github.com/Braden1996/luau-web-checker
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from "@astrojs/starlight/components";
+
+```luau
+type Shape = { kind: "circle", radius: number } | { kind: "square", side: number }
+
+local function area(shape: Shape): number
+	if shape.kind == "circle" then
+		return math.pi * shape.radius ^ 2
+	end
+	return shape.side * shape.side
+end
+
+local total = area({ kind = "circle", radius = 2 }) + area({ kind = "square", side = 3 })
+local label = string.format("%.2f", total)
+local broken = area({ kind = "triangle", base = 1 }) -- error: not a Shape
+```
+
+<CardGrid stagger>
+  <Card title="Luau's own checker" icon="approve-check">
+    Not a port: the C++ Analysis library inside luau-lsp, built with Emscripten. Its answers are luau-lsp's
+    answers, and the tests prove it on every change.
+  </Card>
+  <Card title="The new solver" icon="rocket">
+    Type functions such as `keyof` and `index`, `Base & {}` structures, and definitions files big enough to make the
+    old solver give up.
+  </Card>
+  <Card title="Checked, hoverable docs" icon="document">
+    An Expressive Code plugin checks every ` ```luau ` block when your site builds and bakes the types in for hover:
+    Twoslash for Luau.
+  </Card>
+  <Card title="Anywhere JavaScript runs" icon="laptop">
+    Browsers, Web Workers, Node and Bun. No server, no native binaries: one 3 MB WebAssembly file.
+  </Card>
+</CardGrid>

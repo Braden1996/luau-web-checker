@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "The playground's Web Worker (WebWorker globals, no DOM)",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2023", "ESNext.Disposable", "WebWorker"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "types": [],
+    "skipLibCheck": true,
+    "rootDir": "."
+  },
+  "include": ["src/**/*.worker.ts", "src/components/playground/raw.d.ts"]
+}

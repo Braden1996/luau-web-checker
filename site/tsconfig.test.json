@@ -1,0 +1,10 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "Tests (bun test)",
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "types": ["bun"],
+    "rootDir": "."
+  },
+  "include": ["src/**/*.test.ts"]
+}

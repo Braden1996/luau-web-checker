@@ -1,0 +1,87 @@
+---
+title: Unions and refinement
+description: Optional values, tagged unions and type guards. Hover the same name before and after a check to see it narrow.
+---
+
+Hover a variable before an `if` and inside it. The type changes, because the check proves something about it.
+
+## Optional values
+
+```luau
+local function findIndex(items: { string }, wanted: string): number?
+	for index, item in items do
+		if item == wanted then
+			return index
+		end
+	end
+	return nil
+end
+
+local index = findIndex({ "a", "b" }, "b")
+if index then
+	local next = index + 1
+end
+local fallback = index or 0
+```
+
+## Tagged unions
+
+A singleton string field is a tag. Checking it narrows the whole table:
+
+```luau
+type Loading = { status: "loading" }
+type Loaded = { status: "loaded", data: { string } }
+type Failed = { status: "failed", reason: string }
+type Request = Loading | Loaded | Failed
+
+local function render(request: Request): string
+	if request.status == "loaded" then
+		return `{#request.data} rows`
+	elseif request.status == "failed" then
+		return `error: {request.reason}`
+	end
+	return "..."
+end
+```
+
+## Exhaustive matching
+
+Narrow a union through every case, and what is left is `never`. Passing it to a function that only accepts `never`
+makes the checker report any case you forgot:
+
+```luau
+type Shape = { kind: "circle", radius: number } | { kind: "square", side: number }
+
+local function unreachable(value: never): never
+	error(`unhandled: {value}`)
+end
+
+local function area(shape: Shape): number
+	if shape.kind == "circle" then
+		return math.pi * shape.radius ^ 2
+	elseif shape.kind == "square" then
+		return shape.side ^ 2
+	end
+	return unreachable(shape)
+end
+```
+
+## Type guards
+
+`typeof` and `type` checks narrow `unknown` values from outside:
+
+```luau
+local function describe(value: unknown): string
+	if typeof(value) == "number" then
+		return `number {value * 2}`
+	elseif typeof(value) == "string" then
+		return `string of {#value}`
+	elseif typeof(value) == "table" then
+		return "a table"
+	end
+	return "something else"
+end
+
+local parsed: unknown = tonumber("42")
+local label = describe(parsed)
+```

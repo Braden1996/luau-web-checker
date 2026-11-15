@@ -1,0 +1,86 @@
+---
+title: Type functions
+description: keyof, index and user-defined type functions, which need the new solver. Hover a type to see what it computes.
+---
+
+Type functions compute types from other types. They exist only in Luau's new type solver, which is why this checker
+runs it. Hover a type name in an annotation to see what it resolves to.
+
+## `keyof` and `index`
+
+```luau
+type Settings = {
+	volume: number,
+	muted: boolean,
+	language: string,
+}
+
+type SettingName = keyof<Settings>
+type Volume = index<Settings, "volume">
+
+local name: SettingName = "muted"
+local level: Volume = 0.8
+local wrong: SettingName = "brightness" -- error: not a key of Settings
+```
+
+## Typed lookups
+
+Combine them for a function whose return type follows its argument:
+
+```luau
+type Defaults = { width: number, title: string, resizable: boolean }
+
+local defaults: Defaults = { width = 800, title = "Untitled", resizable = true }
+
+local function get<K>(key: K & keyof<Defaults>): index<Defaults, K>
+	return (defaults :: any)[key]
+end
+
+local width = get("width")
+local title = get("title")
+local resizable = get("resizable")
+```
+
+## Event maps
+
+The pattern behind most typed event APIs: one table type maps names to handler types.
+
+```luau
+type Events = {
+	open: (path: string) -> (),
+	close: () -> (),
+	progress: (done: number, total: number) -> (),
+}
+
+type Handler<E> = index<Events, E>
+
+local onProgress: Handler<"progress"> = function(done: number, total: number)
+	print(`{math.floor(done / total * 100)}%`)
+end
+
+local handlers: { [keyof<Events>]: (...any) -> () } = {
+	progress = onProgress,
+}
+```
+
+## User-defined type functions
+
+A `type function` runs Luau code at check time to build a type:
+
+```luau
+type function Partial(t)
+	local result = types.newtable()
+	for key, prop in t:properties() do
+		local read = prop.read
+		if read then
+			result:setproperty(key, types.optional(read))
+		end
+	end
+	return result
+end
+
+type Profile = { name: string, age: number }
+type ProfilePatch = Partial<Profile>
+
+local patch: ProfilePatch = { age = 37 }
+```

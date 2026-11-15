@@ -1,0 +1,12 @@
+/* Starlight's palette with Luau's blue as the accent. */
+:root {
+  --sl-color-accent-low: #0b2340;
+  --sl-color-accent: #00a2ff;
+  --sl-color-accent-high: #b8e3ff;
+}
+
+:root[data-theme="light"] {
+  --sl-color-accent-low: #d6efff;
+  --sl-color-accent: #0077c2;
+  --sl-color-accent-high: #0b2f4f;
+}

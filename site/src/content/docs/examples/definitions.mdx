@@ -1,0 +1,69 @@
+---
+title: Definitions files
+description: Check code against an API declared in a definitions file, the way luau-lsp does with --definitions.
+---
+
+import { Code } from "@astrojs/starlight/components";
+
+import exampleApi from "../../../lib/example-api.d.luau?raw";
+
+A definitions file declares an API that exists at run time but is written elsewhere, for example a host
+application's functions or a game engine's objects. luau-lsp loads them with `--definitions=@name=file`, and
+`Checker.create({ definitions })` does the same.
+
+Every example on this site is checked against this one: a small UI toolkit. It uses the shapes that need the new
+solver, namely extern types with inheritance, `keyof`/`index` and intersections.
+
+<Code code={exampleApi} lang="luau" title="example-api.d.luau" />
+
+## Using it
+
+Extern types inherit their parents' methods, and `createElement`'s return type follows its argument:
+
+```luau
+local save = createElement("Button", "save")
+save:SetLabel("Save")
+save:SetWidth(save:GetWidth() + 20)
+save:On("click", function(self: Element)
+	self:Hide()
+end)
+
+local search = createElement("TextBox")
+local query = search:GetText()
+```
+
+Handlers get their parameter types from a message map:
+
+```luau
+local onLogin: Handler<"login"> = function(userName: string, remember: boolean)
+	print(userName, remember)
+end
+subscribe("login")
+```
+
+Intersections combine a base structure with extra fields:
+
+```luau
+local user = Users.find(7)
+if user then
+	local id = user.id
+	local contact = user.email or `{user.name} has no email`
+end
+
+local adults = 0
+for _, person in Users.all() do
+	if person.age >= 18 then
+		adults += 1
+	end
+end
+```
+
+## Mistakes it catches
+
+```luau
+local panel = createElement("Panel") -- error: not a kind of element
+local box = createElement("TextBox")
+box:SetLabel("Name") -- error: a TextBox has no SetLabel
+box:On("hover", nil) -- error: not an event name
+subscribe("logout") -- error: not a message
+```

@@ -1,0 +1,131 @@
+---
+// The playground: Luau's checker running in the browser, in a Web Worker (src/components/playground/).
+import StarlightPage from "@astrojs/starlight/components/StarlightPage.astro";
+---
+
+<StarlightPage
+  frontmatter={{
+    title: "Playground",
+    description: "Type-check Luau in your browser with Luau's own checker and the new solver. Nothing is sent anywhere.",
+    tableOfContents: false,
+  }}
+>
+  <p>
+    Luau's own type checker, compiled to WebAssembly and running in a Web Worker in this tab. Nothing is sent to a
+    server. Hover a name for its type, press <kbd>Ctrl</kbd>+<kbd>Space</kbd> to complete, and copy the link to share
+    the code.
+  </p>
+  <div class="pg not-content" data-playground>
+    <div class="pg-toolbar">
+      <label>Example <select name="example"><option value="" selected disabled>Choose...</option></select></label>
+      <label>
+        Definitions
+        <select name="definitions">
+          <option value="none">Luau globals only</option>
+          <option value="example">Example API</option>
+        </select>
+      </label>
+      <label><input type="checkbox" name="strict" /> Strict</label>
+      <button type="button" name="share">Copy link</button>
+      <span class="pg-status" aria-live="polite"></span>
+    </div>
+    <div class="pg-editor"></div>
+  </div>
+  <p>
+    The <a href={`${import.meta.env.BASE_URL}examples/definitions/`}>example API</a> is the definitions file the
+    site's examples use. The checker loads about 3 MB of WebAssembly the first time; your browser caches it.
+  </p>
+</StarlightPage>
+
+<script>
+  import { mountPlayground } from "../components/playground/playground.ts";
+
+  for (const root of document.querySelectorAll<HTMLElement>("[data-playground]")) {
+    mountPlayground(root);
+  }
+</script>
+
+<style>
+  /* The editor's palette (src/components/playground/editor.ts reads these): GitHub's dark and light code colours,
+     matching the site's other code blocks. */
+  .pg {
+    --pg-bg: #0d1117;
+    --pg-text: #e6edf3;
+    --pg-muted: #6e7681;
+    --pg-active: #161b22;
+    --pg-selection: #264f78;
+    --pg-tooltip: #151b23;
+    --pg-border: #3d444d;
+    --pg-keyword: #ff7b72;
+    --pg-string: #a5d6ff;
+    --pg-number: #79c0ff;
+    --pg-comment: #8b949e;
+    --pg-function: #d2a8ff;
+    --pg-punctuation: #e6edf3;
+  }
+  :global(:root[data-theme="light"]) .pg {
+    --pg-bg: #ffffff;
+    --pg-text: #1f2328;
+    --pg-muted: #8c959f;
+    --pg-active: #f6f8fa;
+    --pg-selection: #b6e3ff;
+    --pg-tooltip: #ffffff;
+    --pg-border: #d1d9e0;
+    --pg-keyword: #cf222e;
+    --pg-string: #0a3069;
+    --pg-number: #0550ae;
+    --pg-comment: #59636e;
+    --pg-function: #8250df;
+    --pg-punctuation: #1f2328;
+  }
+  .pg {
+    margin-top: 1rem;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .pg-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1rem;
+    align-items: center;
+    padding: 0.5rem 0.75rem;
+    border-bottom: 1px solid var(--sl-color-gray-5);
+    background: var(--sl-color-gray-6);
+    font-size: var(--sl-text-sm);
+  }
+  .pg-toolbar select,
+  .pg-toolbar button {
+    margin-left: 0.25rem;
+    padding: 0.15rem 0.4rem;
+    border: 1px solid var(--sl-color-gray-4);
+    border-radius: 0.25rem;
+    background: var(--sl-color-black);
+    color: var(--sl-color-white);
+    font: inherit;
+  }
+  .pg-toolbar button {
+    cursor: pointer;
+  }
+  .pg-status {
+    margin-left: auto;
+    color: var(--sl-color-gray-2);
+  }
+  .pg-status[data-state="error"] {
+    color: var(--sl-color-red-high);
+  }
+  .pg-editor {
+    min-height: 26rem;
+    background: var(--pg-bg);
+  }
+  .pg-editor :global(.cm-editor) {
+    min-height: 26rem;
+    font-size: 0.85rem;
+  }
+  .pg-editor :global(.pg-hover) {
+    padding: 0.3rem 0.5rem;
+    font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+  }
+</style>

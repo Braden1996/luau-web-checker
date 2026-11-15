@@ -21,6 +21,18 @@
 | `src/expressive-code.ts` | The Expressive Code plugin; `src/snippets.ts` has the block conventions, `src/tooltips.ts` the tooltips. |
 | `tests/fixtures/`        | The agreement fixtures (see `tests/agreement.test.ts`).                                                  |
 
+## The site
+
+`site/` is the documentation site (Astro and Starlight), deployed to GitHub Pages from `main`. It is a Bun workspace
+member that uses the package built into `dist/`. The package's own Expressive Code plugin checks its Luau examples,
+so a change that breaks the plugin breaks the site build.
+
+- `mise exec -- moon run site:dev` serves it locally. `moon run site:check` runs its type check, lint, tests and
+  build.
+- Examples go in `site/src/content/docs/examples/`. Every ` ```luau ` block must check. Mark intended errors with
+  `-- error`, and hide setup above `-- ---cut---`.
+- The playground is in `site/src/components/playground/`. It is CodeMirror plus a Web Worker running the checker.
+
 ## Changing the checker
 
 - **Fixtures, not snapshots.** Add a folder to `tests/fixtures/`. The tests compare its diagnostics with

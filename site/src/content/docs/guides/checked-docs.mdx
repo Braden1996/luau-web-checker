@@ -1,0 +1,94 @@
+---
+title: Checked, hoverable docs
+description: Type-check every Luau example in an Astro or Starlight site at build time, and let readers hover them.
+---
+
+import { Aside } from "@astrojs/starlight/components";
+
+`luau-web-checker/expressive-code` is a plugin for [Expressive Code](https://expressive-code.com/), the code-block
+renderer that Astro's Starlight uses. As the site builds, it checks every ` ```luau ` block against your definitions
+and makes the block's identifiers hoverable. This is the idea behind TypeScript's
+[Twoslash](https://twoslash.netlify.app/). Everything happens at build time, so readers download no checker.
+
+## Set up
+
+In a Starlight site, create `ec.config.mjs` next to `astro.config.mjs`. Expressive Code plugins are not serializable,
+so they cannot go in the Astro config.
+
+```js
+// ec.config.mjs
+import { readFileSync } from "node:fs";
+import { defineEcConfig } from "@astrojs/starlight/expressive-code";
+import { Checker } from "luau-web-checker";
+import { pluginLuauTypes } from "luau-web-checker/expressive-code";
+
+const checker = Checker.create({
+  definitions: { "@api": readFileSync("api.d.luau", "utf8") },
+  strict: true,
+});
+
+export default defineEcConfig({
+  plugins: [pluginLuauTypes({ checker: () => checker })],
+});
+```
+
+Create the checker once, outside the plugin. Every block on every page shares it.
+
+## Inside a block
+
+**Hover anything.** Locals, parameters, fields, globals and type names all show their types. A type function
+shows what it resolves to. The examples on this page use the site's
+[example API](/luau-web-checker/examples/definitions/):
+
+```luau
+local onResize: Handler<"resize"> = function(width: number, height: number)
+	print(`now {width}x{height}`)
+end
+```
+
+**Mark the errors you mean to show** with an end-of-line `-- error`. The line is underlined, and its message appears
+on hover. The build fails if a marked line has no error, or if any unmarked line has one:
+
+```luau
+local button = createElement("Button")
+button:SetLabel(42) -- error: a label is a string
+```
+
+**Hide the setup** above a `-- ---cut---` line. The hidden lines are still checked, so an example can use locals it
+does not show. This block starts with three hidden lines:
+
+```luau
+local user = Users.find(1)
+assert(user, "user 1 exists")
+local greeting = "Hello"
+-- ---cut---
+print(`{greeting}, {user.name}!`)
+```
+
+**Skip a block** with ` ```luau nocheck `, for pseudo-code. A block with a top-level `declare` is a definitions file.
+It cannot be checked as a module, so it is shown as written.
+
+Lint warnings, such as unused locals, are ignored, because examples are fragments.
+
+## Options
+
+```ts
+pluginLuauTypes({
+  checker: () => checker, // required: the shared Checker (or a promise of one)
+  languages: ["luau"], // the block languages to check
+  link: (hover, previous) => undefined, // a link for an identifier, e.g. to an API reference page
+  tooltips: true, // false to render your own cards from the data attributes
+});
+```
+
+**Links.** `link` receives each identifier and the one before it, so it can resolve `Namespace.member`. When it
+returns `{ href, attributes }`, the identifier becomes an `<a>`, with the extra attributes your own hover cards need.
+
+**Your own cards.** Each identifier carries `data-luau-type` (its label, such as `local width: number`), and each
+marked error carries `data-luau-error`. With `tooltips: false`, the plugin adds no script, and you render them however
+you like.
+
+<Aside type="tip">
+  [wow-forever-luau-types](https://braden1996.github.io/wow-forever-luau-types/) does both. It checks its guides
+  against a 1.7 MB definitions file, and links API names to the hover cards of its generated reference.
+</Aside>

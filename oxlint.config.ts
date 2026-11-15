@@ -22,7 +22,7 @@ export default defineConfig({
   globals: {
     Bun: "readonly",
   },
-  ignorePatterns: ["**/node_modules/**", "**/dist/**", ".build/**"],
+  ignorePatterns: ["**/node_modules/**", "**/dist/**", ".build/**", "site/**"],
   options: {
     reportUnusedDisableDirectives: "error",
     respectEslintDisableDirectives: false,

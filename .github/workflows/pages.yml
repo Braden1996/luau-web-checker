@@ -1,0 +1,52 @@
+# Builds the documentation site (site/) and deploys it to GitHub Pages on every push to main. The site uses the package
+# built from this commit (dist/), so the WebAssembly is built first; every ```luau block is type-checked as the site
+# builds. The checks run in the `ci` workflow (`moon run :check`); this workflow only publishes. Actions are pinned by
+# commit SHA (Dependabot bumps them; zizmor checks).
+name: pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # Starlight's "last updated" dates come from git history
+          persist-credentials: false
+      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+        with:
+          cache: false # a deploy never reads a cache a pull request could have written
+      - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
+      - name: build
+        env:
+          MOON_CACHE: write
+        run: mise exec -- moon run site:build
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    permissions:
+      pages: write # publish the artifact
+      id-token: write # prove the deployment came from this workflow
+    environment:
+      name: github-pages
+      url: ${{ steps.deploy.outputs.page_url }}
+    steps:
+      - id: deploy
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

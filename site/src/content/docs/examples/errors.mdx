@@ -1,0 +1,93 @@
+---
+title: Errors
+description: A gallery of the mistakes the checker catches. Hover an underline to read its message.
+---
+
+Each underlined line ends in `-- error`, which tells the plugin the example means to fail there. Hover the
+underline to read the checker's message, exactly as luau-lsp prints it. Had any other line failed, the site would
+not have built.
+
+## Wrong types
+
+```luau
+local count: number = "three" -- error
+local function double(value: number): number
+	return value * 2
+end
+local result = double("4") -- error
+local flag: boolean = nil -- error
+```
+
+## Missing values
+
+```luau
+local function find(id: number): { name: string }?
+	return if id == 1 then { name = "Ada" } else nil
+end
+
+local user = find(2)
+print(user.name) -- error: user may be nil
+if user then
+	print(user.name)
+end
+```
+
+## Typos
+
+```luau
+local config = { width = 800, height = 600 }
+local area = config.width * config.heigth -- error
+local text = string.uppre("shout") -- error
+```
+
+## Unknown names
+
+Strict mode reports globals that do not exist:
+
+```luau
+local total = 0
+totl = total + 1 -- error
+print(undefinedHelper()) -- error
+```
+
+## Calls
+
+```luau
+local function greet(name: string, excited: boolean?): string
+	return if excited then `Hi, {name}!` else `Hi, {name}.`
+end
+
+greet() -- error: missing argument
+greet("Ada", "yes") -- error: wrong second argument
+local length = #greet -- error: a function has no length
+```
+
+## Missed cases
+
+```luau
+type Direction = "north" | "south" | "east" | "west"
+
+local function unreachable(value: never): never
+	error(value)
+end
+
+local function opposite(direction: Direction): Direction
+	if direction == "north" then
+		return "south"
+	elseif direction == "south" then
+		return "north"
+	elseif direction == "east" then
+		return "west"
+	end
+	return unreachable(direction) -- error: "west" is not handled
+end
+```
+
+## Syntax
+
+Syntax errors are reported too, where the parser notices them. Here that is the line after the unclosed table:
+
+```luau
+local list = { 1, 2, 3
+local x = 1 -- error: the table above is never closed
+```

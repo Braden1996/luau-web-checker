@@ -1,0 +1,86 @@
+---
+title: Basics
+description: Locals, functions, strings and loops, with every type the checker inferred on hover.
+---
+
+Every block on these pages was type-checked when the site was built. Hover an identifier to see the type Luau's
+new solver gave it. None of these annotations were written by hand.
+
+## Locals and inference
+
+```luau
+local name = "Ada"
+local year = 1815
+local born = `{name} was born in {year}`
+local initials = string.upper(string.sub(name, 1, 1))
+local isEarly = year < 1900
+```
+
+## Functions
+
+Parameters you annotate flow into the return type, which you can leave out:
+
+```luau
+local function clamp(value: number, low: number, high: number)
+	return math.max(low, math.min(value, high))
+end
+
+local function describe(count: number)
+	if count == 1 then
+		return "one item"
+	end
+	return `{count} items`
+end
+
+local clamped = clamp(140, 0, 100)
+local text = describe(clamped)
+```
+
+## Multiple returns and varargs
+
+```luau
+local function divide(a: number, b: number): (number, number)
+	return a // b, a % b
+end
+
+local quotient, remainder = divide(17, 5)
+
+local function sum(...: number): number
+	local total = 0
+	for _, value in { ... } do
+		total += value
+	end
+	return total
+end
+
+local six = sum(1, 2, 3)
+```
+
+## Loops
+
+```luau
+local squares = {}
+for i = 1, 5 do
+	squares[i] = i * i
+end
+
+local words = { "luau", "is", "typed" }
+for index, word in ipairs(words) do
+	print(index, string.len(word))
+end
+
+local lengths: { [string]: number } = {}
+for _, word in words do
+	lengths[word] = #word
+end
+```
+
+## Strings
+
+```luau
+local csv = "id,name,score"
+local columns = string.split(csv, ",")
+local header = table.concat(columns, " | ")
+local padded = string.rep("-", #header)
+local found, finish = string.find(csv, "name", 1, true)
+```

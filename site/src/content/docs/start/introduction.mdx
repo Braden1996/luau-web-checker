@@ -1,0 +1,42 @@
+---
+title: Introduction
+description: What luau-web-checker is, what it is for, and how it stays faithful to luau-lsp.
+---
+
+luau-web-checker is [Luau](https://luau.org/)'s type checker compiled to WebAssembly. Give it definitions files and
+Luau source, and it gives back what an editor would: type errors, the type of every identifier, and completions.
+
+It has two uses:
+
+- **Checked docs.** Its [Expressive Code](https://expressive-code.com/) plugin type-checks the Luau examples in a docs
+  site as the site builds. A broken example fails the build, and readers hover any identifier to see its type. This
+  site uses it. Hover any of these:
+
+  ```luau
+  local scores = { 12, 40, 7 }
+  table.sort(scores, function(a: number, b: number): boolean
+  	return a > b
+  end)
+  local best = scores[1]
+  local summary = `best of {#scores}: {best}`
+  ```
+
+- **Checking in the browser.** The same checker runs client-side, in a Web Worker. The
+  [playground](/luau-web-checker/playground/) is about 300 lines of CodeMirror on top of it.
+
+## Faithful to luau-lsp
+
+It is not a reimplementation of Luau. It compiles the C++ Analysis library that
+[luau-lsp](https://github.com/JohnnyMorganz/luau-lsp) and `luau-analyze` use, pinned to the release luau-lsp 1.70.1
+uses (Luau 0.740). It also sets the checker up the way `luau-lsp analyze` does: luau-lsp's default flags, the
+**new type solver**, your definitions files, then the globals your settings disable.
+
+That is checked, not assumed. The test suite runs every fixture through both this build and the real `luau-lsp`,
+and the two must report the same diagnostics, down to the message. [Agreement with luau-lsp](/luau-web-checker/guides/agreement/)
+has the details.
+
+## Where next
+
+- [Install](/luau-web-checker/start/install/) it, then see [usage](/luau-web-checker/start/usage/).
+- Set up [checked, hoverable docs](/luau-web-checker/guides/checked-docs/) for your own project.
+- Browse the [examples](/luau-web-checker/examples/basics/): ordinary Luau, every block checked and hoverable.
