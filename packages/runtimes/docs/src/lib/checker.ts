@@ -3,7 +3,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
-import { Checker } from "@luau-web-checker/checker";
+import { Checker } from "luau-web-checker";
 
 /** The example API's source. The build runs from site/, where `src/lib/` is. */
 export function exampleApi(): string {

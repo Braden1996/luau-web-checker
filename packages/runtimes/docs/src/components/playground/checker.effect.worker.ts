@@ -1,8 +1,8 @@
 // The playground's checker, off the main thread: luau-web-checker with the example API (or none), answering one
 // request at a time. The module and the .wasm load on the first request; Vite bundles both with the site.
 
-import type { Diagnostic, Hover } from "@luau-web-checker/checker";
-import { Checker } from "@luau-web-checker/checker";
+import type { Diagnostic, Hover } from "luau-web-checker";
+import { Checker } from "luau-web-checker";
 
 import exampleApi from "../../lib/example-api.d.luau?raw";
 import type { Definitions, Request, Response } from "./protocol.ts";

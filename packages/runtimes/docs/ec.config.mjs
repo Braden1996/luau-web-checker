@@ -2,8 +2,7 @@
 // Every ```luau block on the site is type-checked at build time by this package's own plugin, and its identifiers
 // get hover tooltips (src/lib/checker.ts sets up the checker).
 import { defineEcConfig } from "@astrojs/starlight/expressive-code";
-
-import { pluginLuauTypes } from "@luau-web-checker/checker/expressive-code";
+import { pluginLuauTypes } from "luau-web-checker/expressive-code";
 
 import { siteChecker } from "./src/lib/checker.ts";
 

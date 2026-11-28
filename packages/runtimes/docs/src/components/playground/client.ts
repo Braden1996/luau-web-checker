@@ -1,6 +1,6 @@
 // The page's side of the checker worker: one request at a time, newest wins, each answered by its own promise.
 
-import type { Completion, Diagnostic, Hover } from "@luau-web-checker/checker";
+import type { Completion, Diagnostic, Hover } from "luau-web-checker";
 
 import type { Definitions, Request, Response } from "./protocol.ts";
 

@@ -25,9 +25,8 @@ import {
   lineNumbers,
 } from "@codemirror/view";
 import { tags } from "@lezer/highlight";
-
-import type { HoverView, TokenLines } from "@luau-web-checker/checker/pretty";
-import { hoverView } from "@luau-web-checker/checker/pretty";
+import type { HoverView, TokenLines } from "luau-web-checker/pretty";
+import { hoverView } from "luau-web-checker/pretty";
 
 import type { CheckerClient, Settings } from "./client.ts";
 

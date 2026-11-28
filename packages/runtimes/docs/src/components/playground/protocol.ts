@@ -1,6 +1,6 @@
 // Messages between the playground page and its checker worker (checker.effect.worker.ts). Positions are 1-based.
 
-import type { Completion, Diagnostic, Hover } from "@luau-web-checker/checker";
+import type { Completion, Diagnostic, Hover } from "luau-web-checker";
 
 /** Which definitions the code is checked against: the site's example API, or only Luau's own globals. */
 export type Definitions = "example" | "none";

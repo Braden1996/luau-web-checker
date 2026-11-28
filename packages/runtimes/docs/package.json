@@ -15,7 +15,7 @@
     "@codemirror/view": "catalog:",
     "@lezer/highlight": "catalog:",
     "astro": "catalog:",
-    "@luau-web-checker/checker": "workspace:luau-web-checker@*"
+    "luau-web-checker": "workspace:*"
   },
   "engines": {
     "bun": ">=1.4.4",

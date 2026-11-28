@@ -57,7 +57,7 @@ const config: AstroUserConfig = defineConfig({
   vite: {
     // The checker finds its .wasm through `new URL(..., import.meta.url)`; pre-bundling would move the module away
     // from it in dev.
-    optimizeDeps: { exclude: ["@luau-web-checker/checker"] },
+    optimizeDeps: { exclude: ["luau-web-checker"] },
     worker: { format: "es" },
   },
 });
