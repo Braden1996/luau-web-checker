@@ -1,5 +1,4 @@
 # Pinned tools. `mise install` installs exactly these versions; mise.lock records their checksums.
-# Bump a tool by editing its version here, then `mise lock` and `moon run :check`.
 min_version = "2026.11.2"
 
 [settings]
@@ -7,7 +6,7 @@ lockfile = true
 experimental = true
 
 [tools]
-"aqua:moonrepo/moon" = "2.6.5" # task runner: `moon run :check` is the gate
+node = "26.13.1"
 "bun" = "1.4.4" # package manager, build scripts and tests
 
 # The Luau release that is compiled. Keep it equal to the one luau-lsp pins (its `luau` submodule); the agreement
@@ -23,9 +22,19 @@ experimental = true
 "aqua:Kitware/CMake" = "4.5.0"
 "aqua:ninja-build/ninja" = "1.13.2"
 
-"aqua:crate-ci/typos" = "1.52.2"
 "aqua:rhysd/actionlint" = "1.7.12"
 "aqua:zizmorcore/zizmor" = "1.32.0" # GitHub Actions security lint
 "aqua:koalaman/shellcheck" = "0.11.0" # used by actionlint for run: scripts
-"aqua:dprint/dprint" = "0.64.3" # Markdown, JSON, YAML and TOML formatting
-"aqua:evilmartians/lefthook" = "2.2.2" # git hooks
+
+"aqua:gitleaks/gitleaks" = "8.30.1"
+
+[tools."http:sgt"]
+version = "0.15.0"
+bin_path = "."
+
+[tools."http:sgt".platforms]
+linux-x64 = { url = "https://github.com/Braden1996/sergeant-releases/releases/download/v0.15.0/sgt-x86_64-unknown-linux-musl.tar.gz" }
+linux-arm64 = { url = "https://github.com/Braden1996/sergeant-releases/releases/download/v0.15.0/sgt-aarch64-unknown-linux-musl.tar.gz" }
+macos-x64 = { url = "https://github.com/Braden1996/sergeant-releases/releases/download/v0.15.0/sgt-x86_64-apple-darwin.tar.gz" }
+macos-arm64 = { url = "https://github.com/Braden1996/sergeant-releases/releases/download/v0.15.0/sgt-aarch64-apple-darwin.tar.gz" }
+windows-x64 = { url = "https://github.com/Braden1996/sergeant-releases/releases/download/v0.15.0/sgt-x86_64-pc-windows-msvc.tar.gz" }

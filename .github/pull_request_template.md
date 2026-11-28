@@ -1,10 +1,12 @@
 ## What and why
 
-<!-- One concern per pull request. Title: type(scope): summary. -->
+<!-- Use a Conventional Commit title. -->
 
 ## Checklist
 
-- [ ] `mise exec -- moon run :check` passes locally
-- [ ] A Luau bump changes `http:luau-source` and `LUAU_VERSION` together, to the release the pinned luau-lsp uses
-- [ ] A behaviour change has a fixture in `tests/fixtures/` (agreement with luau-lsp) or a case in `tests/queries.test.ts`
-- [ ] `CHANGELOG.md` has a line under "Unreleased" if users will notice the change
+- [ ] `sgt check`, `sgt test`, and `sgt build` pass locally.
+- [ ] Any Luau upgrade keeps `http:luau-source`, `LUAU_VERSION`, and the Luau version used by luau-lsp aligned.
+- [ ] Behavior changes have an agreement fixture or query test.
+- [ ] User-visible changes are listed under Unreleased in `CHANGELOG.md`.
+
+[Sergeant playbook](https://github.com/Braden1996/sergeant#readme)

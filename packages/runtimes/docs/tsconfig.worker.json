@@ -1,0 +1,4 @@
+{
+  "extends": "@sgt-build/tsconfig/worker",
+  "include": ["types/**/*.d.ts", "src/**/*.worker.ts"]
+}

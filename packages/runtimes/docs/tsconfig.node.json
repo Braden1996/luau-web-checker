@@ -1,0 +1,8 @@
+{
+  "extends": ["../../../tsconfig.base.json", "@sgt-build/tsconfig/node"],
+  "compilerOptions": {
+    "types": ["node", "bun"],
+    "skipLibCheck": true
+  },
+  "include": ["types", "astro.config.ts", "scripts/**/*.ts"]
+}

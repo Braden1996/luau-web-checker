@@ -1,0 +1,4 @@
+{
+  "name": "@luau-web-checker/checker",
+  "kind": "ts:dom",
+}

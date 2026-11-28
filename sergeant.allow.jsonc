@@ -1,0 +1,77 @@
+{
+  "$schema": "./.sergeant/schema.allow.json",
+  "allow": [
+    {
+      "rule": "boundaries/barrel",
+      "file": "packages/libraries/ts/dom/luau-web-checker/src/expressive-code.ts",
+      "count": 1,
+      "reason": "Preserves the published package entry point."
+    },
+    {
+      "rule": "boundaries/barrel",
+      "file": "packages/libraries/ts/dom/luau-web-checker/src/index.ts",
+      "count": 1,
+      "reason": "Preserves the published package entry point."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/agreement.test.ts",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/expressive-code.test.ts",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/fixtures/require/.luaurc",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/fixtures/stdlib/settings.json",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/pretty.test.ts",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/tests/queries.test.ts",
+      "count": 1,
+      "reason": "Keeps the library test suite and its fixtures in the requested tests directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/wasm/CMakeLists.txt",
+      "count": 1,
+      "reason": "Keeps the CMake inputs together in the library's wasm directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/libraries/ts/dom/luau-web-checker/wasm/checker.cpp",
+      "count": 1,
+      "reason": "Keeps the CMake inputs together in the library's wasm directory."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/runtimes/docs/tsconfig.worker.json",
+      "count": 1,
+      "reason": "Type-checks the playground worker with WebWorker globals independently of the browser UI."
+    },
+    {
+      "rule": "boundaries/layout",
+      "file": "packages/runtimes/docs/tsconfig.ec.json",
+      "count": 1,
+      "reason": "Type-checks the Expressive Code JavaScript config with the Astro preset."
+    }
+  ]
+}

@@ -1,72 +1,47 @@
 {
-  "name": "luau-web-checker",
-  "version": "0.4.0",
-  "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, plus build-time checked, hoverable code blocks for Expressive Code (Twoslash for Luau).",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Braden1996/luau-web-checker.git"
-  },
-  "license": "MIT",
-  "author": "Braden Marshall",
-  "sideEffects": false,
+  "name": "luau-web-checker-workspace",
+  "private": true,
   "type": "module",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "default": "./dist/index.js"
-    },
-    "./expressive-code": {
-      "types": "./dist/expressive-code.d.ts",
-      "default": "./dist/expressive-code.js"
-    },
-    "./pretty": {
-      "types": "./dist/pretty.d.ts",
-      "default": "./dist/pretty.js"
-    },
-    "./luau-checker.wasm": "./dist/luau-checker.wasm",
-    "./package.json": "./package.json"
-  },
-  "files": [
-    "dist/*.js",
-    "dist/*.d.ts",
-    "dist/luau-checker.mjs",
-    "dist/luau-checker.d.mts",
-    "dist/luau-checker.wasm",
-    "dist/LICENSE-luau.txt"
-  ],
-  "workspaces": [
-    "site"
-  ],
+  "packageManager": "bun@1.4.4",
   "scripts": {
-    "build:wasm": "bun scripts/build-wasm.ts",
-    "build:ts": "tsc -p tsconfig.build.json && bun scripts/copy-types.ts",
-    "build": "bun run build:wasm && bun run build:ts",
-    "typecheck": "tsc -p tsconfig.json",
-    "lint": "oxlint --type-aware --deny-warnings src tests scripts oxlint.config.ts oxfmt.config.ts",
-    "fmt": "oxfmt --write src tests scripts oxlint.config.ts oxfmt.config.ts",
-    "fmt:check": "oxfmt --check src tests scripts oxlint.config.ts oxfmt.config.ts",
-    "test": "bun test"
+    "wasm:prepare": "bun packages/libraries/ts/dom/luau-web-checker/scripts/build-wasm.effect.ts"
   },
-  "devDependencies": {
-    "@expressive-code/core": "0.44.3",
-    "@types/bun": "1.4.4",
-    "oxfmt": "0.78.0",
-    "oxlint": "1.93.0",
-    "oxlint-tsgolint": "7.0.2007",
-    "shiki": "4.6.0",
-    "typescript": "7.0.2"
-  },
-  "peerDependencies": {
-    "@expressive-code/core": ">=0.40.0 <1"
-  },
-  "peerDependenciesMeta": {
-    "@expressive-code/core": {
-      "optional": true
+  "workspaces": {
+    "packages": [
+      "packages/libraries/ts/*/*",
+      "packages/runtimes/*"
+    ],
+    "catalog": {
+      "@astrojs/check": "0.9.12",
+      "@astrojs/starlight": "0.43.1",
+      "@codemirror/autocomplete": "6.20.4",
+      "@codemirror/commands": "6.11.1",
+      "@codemirror/language": "6.13.1",
+      "@codemirror/legacy-modes": "6.5.5",
+      "@codemirror/lint": "6.9.8",
+      "@codemirror/state": "6.7.6",
+      "@codemirror/view": "6.43.15",
+      "@expressive-code/core": "0.44.3",
+      "@lezer/highlight": "1.2.5",
+      "@types/bun": "1.4.4",
+      "@types/node": "26.6.6",
+      "@typescript/native": "npm:typescript@7.0.2",
+      "astro": "7.4.12",
+      "sharp": "0.35.5",
+      "typescript": "6.0.3"
     }
   },
-  "packageManager": "bun@1.4.4",
-  "engines": {
-    "bun": ">=1.4.4",
-    "node": ">=22"
+  "devDependencies": {
+    "@sgt-build/oxlint-config": "file:../sergeant/dist/npm/sgt-build-oxlint-config-0.15.0.tgz",
+    "@sgt-build/oxlint-config-worker": "file:../sergeant/dist/npm/sgt-build-oxlint-config-worker-0.15.0.tgz",
+    "@sgt-build/tsconfig": "file:../sergeant/dist/npm/sgt-build-tsconfig-0.15.0.tgz",
+    "@typescript/native": "catalog:",
+    "oxlint": "1.93.0",
+    "oxlint-tsgolint": "7.0.2007",
+    "typescript": "catalog:",
+    "sharp": "catalog:"
+  },
+  "overrides": {
+    "@sgt-build/oxlint-config": "file:../sergeant/dist/npm/sgt-build-oxlint-config-0.15.0.tgz"
   }
 }

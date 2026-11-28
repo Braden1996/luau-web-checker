@@ -1,0 +1,4 @@
+{
+  // Sergeant 0.15.0's frozen installer requires its own layout for workspaces.packages.
+  "ignorePatterns": ["package.json"],
+}

@@ -1,3 +1,2 @@
 * text=auto eol=lf
 *.luau linguist-language=Luau
-tests/fixtures/**/*.expected.json linguist-generated=true

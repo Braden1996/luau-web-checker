@@ -1,6 +1,5 @@
 .build/
+.sergeant/
 dist/
 node_modules/
-.moon/cache/
-.moon/docker/
 *.tgz

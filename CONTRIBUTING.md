@@ -2,54 +2,48 @@
 
 ## Setup
 
-1. Install [mise](https://mise.jdx.dev/), then run `mise install`. It installs every pinned tool, with checksums
-   from `mise.lock`.
-2. Run `mise exec -- lefthook install` to install the git hooks.
-3. Run `mise exec -- moon run :check`. The first run builds the WebAssembly: emsdk installs its Emscripten release
-   (about 1 GB, once), then Luau's Analysis compiles, which takes a few minutes.
+Install [mise](https://mise.jdx.dev/) and run `mise install`. The pinned Sergeant 0.15.0 config tarballs
+must be available in the sibling `../sergeant/dist/npm/` directory. CI populates that directory from npm.
 
-`moon run :check` is the gate. CI runs it in full from a cold cache on every pull request.
+Run these commands from the repository root:
+
+```sh
+mise exec -- bun run wasm:prepare
+mise exec -- sgt install
+mise exec -- sgt doctor
+mise exec -- sgt check
+mise exec -- sgt test
+mise exec -- sgt build
+```
+
+The WASM preparation step uses the pinned Emscripten release to compile Luau and stores the result in
+`.build/wasm-artifacts/`. The first run downloads Emscripten and can take several minutes. Later runs reuse
+the matching artifacts. Sergeant caches the WASM assets and package assembly separately from the docs build.
+
+See the [Sergeant playbook](https://github.com/Braden1996/sergeant#readme) for workspace commands.
 
 ## Layout
 
-| Path                     | What                                                                                                     |
-| ------------------------ | -------------------------------------------------------------------------------------------------------- |
-| `wasm/checker.cpp`       | The C++ wrapper over Luau's `Frontend`. It sets up the solver as luau-lsp does and returns JSON.         |
-| `wasm/CMakeLists.txt`    | The Emscripten build (`-fwasm-exceptions`, embind, ES module output).                                    |
-| `scripts/build-wasm.ts`  | Finds the pinned emsdk and Luau through `mise where`, installs Emscripten, runs CMake into `dist/`.      |
-| `src/index.ts`           | The typed TypeScript API over the embind class. It uses 1-based positions and checks every JSON entry.   |
-| `src/expressive-code.ts` | The Expressive Code plugin; `src/snippets.ts` has the block conventions, `src/tooltips.ts` the tooltips. |
-| `tests/fixtures/`        | The agreement fixtures (see `tests/agreement.test.ts`).                                                  |
+- `packages/libraries/ts/dom/luau-web-checker/` contains the npm package, C++ wrapper, build scripts, and agreement tests.
+- `packages/runtimes/docs/` contains the Astro and Starlight site. The site checks its Luau examples with the workspace
+  package while building. Its playground uses CodeMirror and a Web Worker.
+- `mise.toml` and `mise.lock` pin Luau, luau-lsp, and the build toolchain.
 
-## The site
+## Working on the checker and docs
 
-`site/` is the documentation site (Astro and Starlight), deployed to GitHub Pages from `main`. It is a Bun workspace
-member that uses the package built into `dist/`. The package's own Expressive Code plugin checks its Luau examples,
-so a change that breaks the plugin breaks the site build.
+Add agreement fixtures under the library's `tests/fixtures/`. The tests compare diagnostics with `luau-lsp analyze`.
+Mark lines that must fail with `-- expect-error: <why>`.
 
-- `mise exec -- moon run site:dev` serves it locally. `moon run site:check` runs its type check, lint, tests and
-  build.
-- Examples go in `site/src/content/docs/examples/`. Every ` ```luau ` block must check. Mark intended errors with
-  `-- error`, and hide setup above `-- ---cut---`.
-- The playground is in `site/src/components/playground/`. It is CodeMirror plus a Web Worker running the checker.
+Keep `http:luau-source` and `LUAU_VERSION` in `src/index.ts` aligned with the Luau submodule used by the pinned luau-lsp.
+Update `mise.lock` when changing a tool pin, then rerun the WASM preparation step.
 
-## Changing the checker
+Run `mise exec -- sgt run docs:dev` to preview the docs. Examples live under `src/content/docs/examples/` in the docs unit.
+Mark expected errors with `-- error` and hide setup above `-- ---cut---`.
 
-- **Fixtures, not snapshots.** Add a folder to `tests/fixtures/`. The tests compare its diagnostics with
-  `luau-lsp analyze`, so nothing needs recording. Mark each line that must fail with `-- expect-error: <why>`.
-- **Bumping Luau.** Change `http:luau-source` in `mise.toml` and `LUAU_VERSION` in `src/index.ts` to the release the
-  pinned luau-lsp uses (its `luau` submodule), bump luau-lsp with them, then run `mise lock`. The agreement tests
-  catch a mismatch.
-- **Bumping Emscripten.** Change `http:emsdk`, then run `mise lock`.
+## Pull requests and releases
 
-## Pull requests
+Use a Conventional Commit title such as `fix(api): handle empty input`. Add user-visible changes under
+Unreleased in [CHANGELOG.md](CHANGELOG.md).
 
-- Title: `type(scope): summary` (Conventional Commits; the `pr-title` check lists the types and scopes).
-- Add a line under "Unreleased" in `CHANGELOG.md` when users will notice the change.
-
-## Releasing
-
-1. Move the "Unreleased" notes under a new version heading.
-2. Set `version` in `package.json` to that version.
-3. Tag `vX.Y.Z` and push the tag. The release workflow re-runs the gate cold, then attaches the npm tarball,
-   the `.wasm` and its glue, and `SHA256SUMS`.
+For a release, move the notes into a version section, update the library's `package.json` version, and push a matching
+`vX.Y.Z` tag. The workflow verifies the tag and attaches the npm tarball, WASM binary, JavaScript glue, and checksums.

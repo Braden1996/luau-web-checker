@@ -1,0 +1,33 @@
+{
+  "name": "docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The documentation site for luau-web-checker (Astro + Starlight, static for GitHub Pages).",
+  "type": "module",
+  "dependencies": {
+    "@astrojs/starlight": "catalog:",
+    "@codemirror/autocomplete": "catalog:",
+    "@codemirror/commands": "catalog:",
+    "@codemirror/language": "catalog:",
+    "@codemirror/legacy-modes": "catalog:",
+    "@codemirror/lint": "catalog:",
+    "@codemirror/state": "catalog:",
+    "@codemirror/view": "catalog:",
+    "@lezer/highlight": "catalog:",
+    "astro": "catalog:",
+    "@luau-web-checker/checker": "workspace:luau-web-checker@*"
+  },
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=26.13.1"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "preview": "astro preview"
+  },
+  "devDependencies": {
+    "@astrojs/check": "catalog:",
+    "@types/bun": "catalog:",
+    "@types/node": "catalog:"
+  }
+}

@@ -1,7 +1,3 @@
-# Publishes a release when a `v*.*.*` tag is pushed. The tagged commit is re-verified with the full `moon run :check`
-# from a cold start (no tool or moon cache, so nothing a pull request wrote can reach a release; the WebAssembly is
-# built from source here), the tag must match package.json's `version`, then the npm tarball, the WebAssembly and its
-# glue are attached with checksums. Consumers install the tarball by URL (bun.lock records its integrity).
 name: release
 
 on:
@@ -20,43 +16,45 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 45
     permissions:
-      contents: write # create the release
+      contents: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
-      - uses: jdx/mise-action@d5574b52816a478f9d4e6529a3f6ff17a8a36785 # v5.2.8
+      - uses: Braden1996/sergeant-releases/actions/setup@v0.15.0 # zizmor: ignore[unpinned-uses]
         with:
-          cache: false
-      - name: gate
-        env:
-          MOON_CACHE: write
-        run: mise exec -- moon run :check
-      - name: version matches tag
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          if ! grep -q "\"version\": \"${TAG#v}\"" package.json; then
-            echo "::error file=package.json::version is not ${TAG#v}"
-            exit 1
-          fi
-      - name: release notes
-        env:
-          TAG: ${{ github.ref_name }}
-        run: |
-          # The CHANGELOG.md section for this version, without its heading.
-          awk -v v="${TAG#v}" 'index($0, "## [" v "]") == 1 {on=1; next} /^## / && on {exit} on && !/^\[.*\]: http/' CHANGELOG.md > notes.md
-          if ! grep -q '[^[:space:]]' notes.md; then echo "::error file=CHANGELOG.md::no section for ${TAG#v}"; exit 1; fi
-          cat notes.md
-      - name: publish
+          seal-sysctl: "true"
+      - uses: ./.github/actions/prepare
+      - uses: Braden1996/sergeant-releases/actions/ci@v0.15.0 # zizmor: ignore[unpinned-uses]
+      - name: Find existing release
+        id: existing
         env:
           GH_TOKEN: ${{ github.token }}
-          TAG: ${{ github.ref_name }}
         run: |
-          mise exec -- bun pm pack --ignore-scripts
-          tarball="luau-web-checker-${TAG#v}.tgz"
-          test -f "$tarball"
-          cp dist/luau-checker.wasm dist/luau-checker.mjs .
+          set -euo pipefail
+          if gh release view "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo 'found=true' >> "$GITHUB_OUTPUT"
+          fi
+      - uses: Braden1996/sergeant-releases/actions/release-npm@v0.15.0 # zizmor: ignore[unpinned-uses]
+        if: steps.existing.outputs.found != 'true'
+        with:
+          working-directory: packages/libraries/ts/dom/luau-web-checker
+          changelog: ../../../../../CHANGELOG.md
+          publish: "false"
+      - name: Attach standalone WASM and its glue
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          assets="$(mktemp -d)"
+          cd "$assets"
+          tarball="luau-web-checker-${GITHUB_REF_NAME#v}.tgz"
+          gh release download "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --pattern "$tarball" --pattern SHA256SUMS
+          grep -F "  $tarball" SHA256SUMS > tarball.sha256
+          sha256sum --check tarball.sha256
+          tar -xOzf "$tarball" package/dist/luau-checker.wasm > luau-checker.wasm
+          tar -xOzf "$tarball" package/dist/luau-checker.mjs > luau-checker.mjs
           sha256sum "$tarball" luau-checker.wasm luau-checker.mjs > SHA256SUMS
-          gh release create "$TAG" "$tarball" luau-checker.wasm luau-checker.mjs SHA256SUMS \
-            --repo "$GITHUB_REPOSITORY" --title "$TAG" --notes-file notes.md --verify-tag
+          gh release upload "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --clobber \
+            luau-checker.wasm luau-checker.mjs SHA256SUMS

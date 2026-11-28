@@ -1,0 +1,6 @@
+{
+  "name": "@luau-web-checker/docs",
+  "kind": "astro",
+  "dependencies": ["@luau-web-checker/checker"],
+  "reads": ["CHANGELOG.md", "CONTRIBUTING.md", "packages/libraries/ts/dom/luau-web-checker/dist"],
+}

@@ -163,16 +163,8 @@ does not report at the same version. This package compiles that C++ instead, so 
 
 ## Building
 
-Everything is pinned in `mise.toml`: the Luau source, emsdk, Python (which emsdk runs), CMake, Ninja, Bun and the
-reference luau-lsp. It builds on Windows, Linux and macOS.
-
-```sh
-mise install
-mise exec -- moon run :check   # builds the WebAssembly (a few minutes cold), then every check
-```
-
-The first build installs the Emscripten release into emsdk's mise folder (about 1 GB). See
-[CONTRIBUTING.md](CONTRIBUTING.md).
+See [CONTRIBUTING.md](CONTRIBUTING.md) for the pinned WASM toolchain and the local verification commands.
+The [Sergeant playbook](https://github.com/Braden1996/sergeant#readme) describes the workspace tools.
 
 ## Licence
 

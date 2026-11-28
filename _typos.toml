@@ -1,15 +1,5 @@
 [files]
 extend-exclude = [
-  "dist/",
-  ".build/",
-  "node_modules/",
-  "bun.lock",
-  "mise.lock",
-  "site/dist/",
-  "site/.astro/",
-  "site/node_modules/",
-  # Misspelt names on purpose (`"Buton"`, `"clik"`, `"redy"`): each line must be a type error.
-  "tests/fixtures/ui/errors.luau",
-  # The site's gallery of errors misspells names on purpose (`heigth`, `uppre`, `totl`).
-  "site/src/content/docs/examples/errors.mdx",
+  "packages/libraries/ts/dom/luau-web-checker/tests/fixtures/ui/errors.luau",
+  "packages/runtimes/docs/src/content/docs/examples/errors.mdx",
 ]

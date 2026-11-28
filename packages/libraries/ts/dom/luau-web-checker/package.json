@@ -1,0 +1,61 @@
+{
+  "name": "luau-web-checker",
+  "version": "0.4.0",
+  "description": "Luau's own type checker (new solver) compiled to WebAssembly: diagnostics, hover types and completions in the browser, Node or Bun, plus build-time checked, hoverable code blocks for Expressive Code (Twoslash for Luau).",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Braden1996/luau-web-checker.git",
+    "directory": "packages/libraries/ts/dom/luau-web-checker"
+  },
+  "license": "MIT",
+  "author": "Braden Marshall",
+  "sideEffects": false,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "default": "./dist/index.js"
+    },
+    "./expressive-code": {
+      "types": "./dist/expressive-code.d.ts",
+      "default": "./dist/expressive-code.js"
+    },
+    "./pretty": {
+      "types": "./dist/pretty.d.ts",
+      "default": "./dist/pretty.js"
+    },
+    "./luau-checker.wasm": "./dist/luau-checker.wasm",
+    "./package.json": "./package.json"
+  },
+  "imports": {
+    "#luau-checker-native": {
+      "types": "./types/luau-checker.d.mts",
+      "default": "./dist/luau-checker.mjs"
+    }
+  },
+  "files": [
+    "types/luau-checker.d.mts",
+    "dist/*.js",
+    "dist/*.d.ts",
+    "dist/luau-checker.mjs",
+    "dist/luau-checker.d.mts",
+    "dist/luau-checker.wasm",
+    "dist/LICENSE-luau.txt"
+  ],
+  "peerDependencies": {
+    "@expressive-code/core": ">=0.40.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "@expressive-code/core": {
+      "optional": true
+    }
+  },
+  "engines": {
+    "bun": ">=1.4.4",
+    "node": ">=22"
+  },
+  "devDependencies": {
+    "@expressive-code/core": "catalog:",
+    "@types/bun": "catalog:"
+  }
+}

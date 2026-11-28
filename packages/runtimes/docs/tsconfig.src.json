@@ -1,0 +1,7 @@
+{
+  "extends": ["../../../tsconfig.base.json", "@sgt-build/tsconfig/astro", "@sgt-build/tsconfig/src"],
+  "compilerOptions": {
+    "types": ["node"],
+    "lib": ["ES2024", "DOM", "DOM.Iterable", "WebWorker"]
+  }
+}
